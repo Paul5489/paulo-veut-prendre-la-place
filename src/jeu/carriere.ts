@@ -256,7 +256,7 @@ async function exclusions(): Promise<{ historique: Awaited<ReturnType<typeof lir
 }
 
 /** Thèmes les moins joués d'abord (un peu de hasard pour varier). */
-async function themesFrais(nb: number, eviter: string[] = []): Promise<ThemeInfo[]> {
+export async function themesFrais(nb: number, eviter: string[] = []): Promise<ThemeInfo[]> {
   const [index, historique] = await Promise.all([chargerIndex(), lireHistorique()]);
   const vus: Record<string, number> = {};
   for (const h of historique.values()) if (h.theme) vus[h.theme] = (vus[h.theme] ?? 0) + 1;
@@ -268,7 +268,7 @@ async function themesFrais(nb: number, eviter: string[] = []): Promise<ThemeInfo
     .map(({ t }) => t);
 }
 
-async function questionsDuTheme(themeId: string, nb: number, niveau: Niveau, deja: Set<string>): Promise<Question[]> {
+export async function questionsDuTheme(themeId: string, nb: number, niveau: Niveau, deja: Set<string>): Promise<Question[]> {
   const [theme, { historique, exclus }] = await Promise.all([chargerTheme(themeId), exclusions()]);
   const tousExclus = new Set([...exclus, ...deja]);
   return tirerSerie(Array(nb).fill(theme.questions), theme.questions, { niveau, historique, exclus: tousExclus, rng });
