@@ -433,7 +433,7 @@ Script de contrôle `npm run check-questions` :
 
 ### Git
 
-- Identité locale provisoire : « Paul <paul@localhost> ». **Avant le premier envoi sur GitHub**, réécrire l'auteur des commits avec l'adresse « noreply » de GitHub : le dépôt sera public, l'e-mail personnel de Paul ne doit pas y apparaître.
+- Compte GitHub de Paul : **Paul5489**. Identité des commits : « Paul <196360979+Paul5489@users.noreply.github.com> » (adresse privée fournie par GitHub : le dépôt est public, l'e-mail personnel de Paul ne doit jamais y apparaître).
 
 ### Avancement
 
