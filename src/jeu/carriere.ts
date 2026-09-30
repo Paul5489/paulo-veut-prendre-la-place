@@ -280,8 +280,8 @@ async function questionsDuTheme(themeId: string, nb: number, niveau: Niveau, dej
 
 export async function nouvellePartie(niveau: Niveau): Promise<PartieCarriere> {
   const etat = await lireEtatCarriere();
-  const { prenom } = await lireReglages();
-  const joueur = creerJoueur(prenom);
+  const { prenom, avatarGraine } = await lireReglages();
+  const joueur = creerJoueur(prenom, avatarGraine);
   const role = etat.champion.participant.estJoueur ? 'champion' : 'candidat';
   const bonus = bonusProgression(etat);
   const exclure = [prenom, etat.champion.participant.prenom];

@@ -35,9 +35,11 @@ export interface Reglages {
   chrono: boolean;
   /** prénom affiché sur le plateau */
   prenom: string;
+  /** variation du dessin de l'avatar du joueur */
+  avatarGraine: number;
 }
 
-export const REGLAGES_DEFAUT: Reglages = { son: true, chrono: false, prenom: 'Paulo' };
+export const REGLAGES_DEFAUT: Reglages = { son: true, chrono: false, prenom: 'Paulo', avatarGraine: 0 };
 
 /** Meilleur score de la partie rapide, par niveau */
 export type Records = Partial<Record<Niveau, number>>;

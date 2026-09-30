@@ -1,6 +1,7 @@
 import type { JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { Avatar, presentation } from '../../composants/Avatar';
+import { Fauteuil, Plateau } from '../../composants/Plateau';
 import {
   lireEtatCarriere,
   lirePartie,
@@ -132,22 +133,25 @@ function EtapePresentation({ p, maj }: PropsEtape) {
       />
       <div class="fauteuil-champion">
         <p class="petit-titre">Dans le fauteuil</p>
-        <Avatar p={champion} taille={72} couronne />
+        <Fauteuil p={champion} taille={64} />
         <strong>{champion.estJoueur ? `${champion.prenom} (toi)` : champion.prenom}</strong>
         {!champion.estJoueur && <span class="doux">{presentation(champion)}</span>}
         <span class="or">
           {p.championVictoires} victoire{p.championVictoires > 1 ? 's' : ''} · cagnotte {formaterEuros(p.championCagnotte)}
         </span>
       </div>
-      <div class="grille-candidats">
-        {p.candidats.map((c) => (
-          <div key={c.id} class={`carte-candidat ${c.estJoueur ? 'joueur' : ''}`}>
-            <Avatar p={c} taille={48} />
-            <strong>{c.estJoueur ? `${c.prenom} (toi)` : c.prenom}</strong>
-            <small>{presentation(c)}</small>
-          </div>
-        ))}
-      </div>
+      <Plateau participants={p.candidats} etats={Object.fromEntries(p.candidats.map((c) => [c.id, { eclaire: c.estJoueur }]))} />
+      <ul class="liste-candidats">
+        {p.candidats
+          .filter((c) => !c.estJoueur)
+          .map((c) => (
+            <li key={c.id}>
+              <Avatar p={c} taille={30} />
+              <strong>{c.prenom}</strong>
+              <span class="doux">{presentation(c)}</span>
+            </li>
+          ))}
+      </ul>
       <button
         class="bouton principal grand"
         onClick={() => maj({ ...p, etape: p.role === 'champion' ? 'preliminaires' : 'qualifs', pas: 0 })}
@@ -222,7 +226,7 @@ function EtapeFin({ p }: PropsEtape) {
       {etat && (
         <div class="fauteuil-champion">
           <p class="petit-titre">Champion en titre</p>
-          <Avatar p={etat.champion.participant} taille={64} couronne />
+          <Fauteuil p={etat.champion.participant} taille={60} />
           <strong>{etat.champion.participant.estJoueur ? `${etat.champion.participant.prenom} (toi)` : etat.champion.participant.prenom}</strong>
           <span class="or">
             {etat.champion.victoires} victoire{etat.champion.victoires > 1 ? 's' : ''} · cagnotte {formaterEuros(etat.champion.cagnotte)}

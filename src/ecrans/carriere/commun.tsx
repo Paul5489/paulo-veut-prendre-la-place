@@ -1,5 +1,8 @@
-import type { ComponentChildren } from 'preact';
-import type { ResultatQuestion } from '../../composants/CarteQuestion';
+import type { ComponentChildren, ComponentProps } from 'preact';
+import { useState } from 'preact/hooks';
+import { CarteQuestion, type ResultatQuestion } from '../../composants/CarteQuestion';
+import { Plateau, type EtatBuzzer, type EtatPupitre } from '../../composants/Plateau';
+import { sons } from '../../son';
 import type { ItemDefile } from '../../composants/Defile';
 import type { Participant } from '../../logique/adversaires';
 import type { ReponseEnregistree } from '../../logique/carriere';
@@ -52,3 +55,39 @@ export const accord = (p: Participant, masculin: string, feminin: string) => (p.
 
 /** « de Marc », mais « d’Isabelle » */
 export const de = (prenom: string) => (/^[aeiouyhàâäéèêëîïôöùûü]/i.test(prenom) ? `d’${prenom}` : `de ${prenom}`);
+
+/** États de départ des pupitres : les scores, et éventuellement le buzzer déjà allumé du joueur. */
+export function pupitres(participants: Participant[], scores: Record<string, number>): Record<string, EtatPupitre> {
+  return Object.fromEntries(participants.map((x) => [x.id, { score: scores[x.id] ?? 0 }]));
+}
+
+type PropsCarte = ComponentProps<typeof CarteQuestion>;
+
+/** Ta question, avec le plateau au-dessus : projecteur sur toi, ton buzzer s'allume quand tu réponds. */
+export function QuestionSurPlateau({
+  participants,
+  scores,
+  ...carte
+}: PropsCarte & { participants: Participant[]; scores: Record<string, number> }) {
+  const [buzzer, setBuzzer] = useState<EtatBuzzer>('eteint');
+  const [gain, setGain] = useState<number | null>(null);
+  const etats: Record<string, EtatPupitre> = {};
+  for (const x of participants) {
+    etats[x.id] = x.estJoueur
+      ? { score: (scores[x.id] ?? 0) + (gain ?? 0), eclaire: true, buzzer, gain }
+      : { score: scores[x.id] ?? 0, attenue: true };
+  }
+  return (
+    <>
+      <Plateau participants={participants} etats={etats} compact />
+      <CarteQuestion
+        {...carte}
+        onCorrection={(correct, points) => {
+          sons.buzz();
+          setBuzzer(correct === null ? 'appuye' : correct ? 'juste' : 'faux');
+          setGain(correct === null ? null : points);
+        }}
+      />
+    </>
+  );
+}

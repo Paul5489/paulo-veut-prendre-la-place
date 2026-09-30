@@ -64,6 +64,8 @@ interface Props {
   differee?: boolean;
   /** score potentiel déjà accumulé (mode différé) */
   potentiel?: number;
+  /** prévenu dès la réponse (null = réponse enregistrée sans correction), pour allumer le buzzer */
+  onCorrection?: (correct: boolean | null, points: number) => void;
 }
 
 /**
@@ -79,6 +81,7 @@ export function CarteQuestion({
   superCash = false,
   differee = false,
   potentiel = 0,
+  onCorrection,
 }: Props) {
   const [mode, setMode] = useState<ModeReponse | null>(modeImpose ?? null);
   const [reponse, setReponse] = useState<string | null>(null);
@@ -94,6 +97,7 @@ export function CarteQuestion({
   const corriger = (ok: boolean) => {
     setCorrect(ok);
     setCorrigee(true);
+    onCorrection?.(differee ? null : ok, superCash ? pointsSuperCash(ok) : pointsObtenus(mode, ok));
     if (differee) sons.clic();
     else if (ok) sons.bonne();
     else sons.mauvaise();
@@ -128,6 +132,7 @@ export function CarteQuestion({
   const contester = () => {
     setContestee(true);
     setCorrect(true);
+    onCorrection?.(true, superCash ? pointsSuperCash(true) : pointsObtenus(mode, true));
     sons.bonne();
   };
 

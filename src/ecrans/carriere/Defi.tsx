@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
-import { Avatar } from '../../composants/Avatar';
 import { CarteQuestion } from '../../composants/CarteQuestion';
-import { Defile } from '../../composants/Defile';
+import { Defile, type EtatDefile, type ItemDefile } from '../../composants/Defile';
+import { SceneDuel, type EtatBuzzer, type EtatPupitre } from '../../composants/Plateau';
 import {
   attribuerThemes,
   NB_QUESTIONS_DEFI,
@@ -11,7 +11,6 @@ import {
   trouver,
   type PartieCarriere,
 } from '../../jeu/carriere';
-import type { Participant } from '../../logique/adversaires';
 import type { ThemeInfo } from '../../logique/carriere';
 import { CATEGORIES_PAR_ID } from '../../logique/categories';
 import { NOM_MODE, pointsObtenus } from '../../logique/scores';
@@ -20,23 +19,42 @@ import { sons } from '../../son';
 import { marquerVues, tauxParCategorie } from '../../stockage/db';
 import { accord, BandeauEtape, cloner, de, itemDefile, noter, versEnregistree, type PropsEtape } from './commun';
 
-/** Face-à-face du Défi : challenger (score potentiel ou révélé) contre champion. */
-function Duel({ p, gauche, droite }: { p: PartieCarriere; gauche: string; droite: string }) {
-  const challenger = trouver(p, p.challenger!);
-  const bloc = (c: Participant, texte: string, couronne: boolean) => (
-    <div class={`duel-bloc ${couronne ? 'fauteuil' : ''}`}>
-      <Avatar p={c} taille={46} couronne={couronne} />
-      <strong>{c.estJoueur ? 'Toi' : c.prenom}</strong>
-      <span>{texte}</span>
-    </div>
-  );
+/** Face-à-face du Défi : le challenger à son pupitre, le champion dans son fauteuil. */
+function Duel({
+  p,
+  gauche,
+  droite,
+  challenger: ec = {},
+  champion: eh = {},
+}: {
+  p: PartieCarriere;
+  gauche: string;
+  droite: string;
+  challenger?: EtatPupitre;
+  champion?: EtatPupitre;
+}) {
   return (
-    <div class="duel">
-      {bloc(challenger, gauche, false)}
-      <span class="duel-vs">VS</span>
-      {bloc(p.champion, droite, true)}
-    </div>
+    <SceneDuel
+      challenger={trouver(p, p.challenger!)}
+      champion={p.champion}
+      etatChallenger={ec}
+      etatChampion={eh}
+      texteChallenger={gauche}
+      texteChampion={droite}
+    />
   );
+}
+
+/** Buzzer et bulle de celui qui joue, pendant le défilé de ses 6 réponses. */
+function etatJoueurDefile(items: ItemDefile[], correction: boolean, etat: EtatDefile): EtatPupitre {
+  if (etat.fini) return {};
+  const it = items[etat.index];
+  if (etat.phase === 'reflexion') return { eclaire: true, bulle: '…' };
+  return {
+    eclaire: true,
+    bulle: `« ${it.saisie} »`,
+    buzzer: correction ? (it.correct ? 'juste' : 'faux') : 'appuye',
+  };
 }
 
 function CarteTheme({ t, classe, onClick, note }: { t: ThemeInfo; classe?: string; onClick?: () => void; note?: string }) {
@@ -190,9 +208,18 @@ export function EtapeDefiJeu({ p, maj, chrono }: PropsEtape) {
     : joueur
       ? `${scoreDefi(liste.slice(0, p.pas))} points`
       : 'En train de jouer';
+  const [buzzer, setBuzzer] = useState<EtatBuzzer>('eteint');
   const duel = (
-    <Duel p={p} gauche={`Potentiel : ${enChallenger && !joueur ? '?' : potentiel} pts`} droite={droite} />
+    <Duel
+      p={p}
+      gauche={`Potentiel : ${enChallenger && !joueur ? '?' : potentiel} pts`}
+      droite={droite}
+      challenger={enChallenger && joueur ? { eclaire: true, buzzer } : {}}
+      champion={!enChallenger && joueur ? { eclaire: true, buzzer } : {}}
+    />
   );
+
+  const items = liste.map((x) => itemDefile(enChallenger ? challenger : p.champion, x.reponse!, x.question));
 
   if (!joueur) {
     return (
@@ -201,12 +228,25 @@ export function EtapeDefiJeu({ p, maj, chrono }: PropsEtape) {
           titre={`Défi · ${enChallenger ? challenger.prenom : p.champion.prenom} joue`}
           detail={`Thème : ${theme.titre}${enChallenger ? ' · ses réponses ne seront corrigées qu’à la fin' : ''}`}
         />
-        {duel}
         <Defile
           key={p.etape}
           titre={enChallenger ? `Les choix ${de(challenger.prenom)}` : `Les réponses ${de(p.champion.prenom)}`}
           correction={!enChallenger}
-          items={liste.map((x) => itemDefile(enChallenger ? challenger : p.champion, x.reponse!, x.question))}
+          items={items}
+          scene={(etat) => {
+            const e = etatJoueurDefile(items, !enChallenger, etat);
+            const vus = etat.fini ? items.length : etat.index + (etat.phase === 'reponse' ? 1 : 0);
+            const cumul = items.slice(0, vus).reduce((t, it) => t + (enChallenger ? (it.mode ? pointsObtenus(it.mode, true) : 0) : it.points), 0);
+            return (
+              <Duel
+                p={p}
+                gauche={enChallenger ? `Potentiel : ${cumul} pts` : `Potentiel : ${potentiel} pts`}
+                droite={enChallenger ? 'Joue ensuite' : `${cumul} pts`}
+                challenger={enChallenger ? e : {}}
+                champion={enChallenger ? {} : e}
+              />
+            );
+          }}
           libelleFin={enChallenger ? `À toi de jouer (score à battre : ${potentiel} au maximum)` : 'La révélation'}
           apres={
             <p class="encart">
@@ -238,6 +278,10 @@ export function EtapeDefiJeu({ p, maj, chrono }: PropsEtape) {
         chrono={chrono}
         differee={enChallenger}
         potentiel={potentiel}
+        onCorrection={(correct) => {
+          sons.buzz();
+          setBuzzer(correct === null ? 'appuye' : correct ? 'juste' : 'faux');
+        }}
         libelleSuivant={p.pas + 1 < NB_QUESTIONS_DEFI ? 'Question suivante' : enChallenger ? `Au tour de ${p.champion.prenom}` : 'La révélation'}
         onSuivant={(r) => {
           const rep = versEnregistree(r);
@@ -245,6 +289,7 @@ export function EtapeDefiJeu({ p, maj, chrono }: PropsEtape) {
           const s = cloner(p);
           const cible = enChallenger ? s.defi!.questionsChallenger : s.defi!.questionsChampion;
           cible[p.pas].reponse = rep;
+          setBuzzer('eteint');
           maj(p.pas + 1 < NB_QUESTIONS_DEFI ? { ...s, pas: p.pas + 1 } : { ...s, ...suivante });
         }}
       />
@@ -295,7 +340,22 @@ export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
   return (
     <>
       <BandeauEtape titre="🥁 La révélation" detail={challenger.estJoueur ? 'Tes réponses, dévoilées une par une.' : `Les réponses ${de(challenger.prenom)}, dévoilées une par une.`} />
-      <Duel p={p} gauche={`${scoreChallenger} pts`} droite={`${scoreChampion} pts`} />
+      <Duel
+        p={p}
+        gauche={`${scoreChallenger} pts`}
+        droite={`${scoreChampion} pts`}
+        challenger={
+          suspense
+            ? { eclaire: true, bulle: '…' }
+            : revelees > 0
+              ? {
+                  buzzer: liste[revelees - 1].reponse?.correct ? 'juste' : 'faux',
+                  bulle: `« ${liste[revelees - 1].reponse?.saisie ?? '—'} »`,
+                }
+              : {}
+        }
+        champion={fini ? { buzzer: challengerGagne ? 'faux' : 'juste' } : {}}
+      />
       <ul class="liste-revelation">
         {liste.map((x, i) => {
           const r = x.reponse!;

@@ -13,6 +13,8 @@ import type { CategorieId, ModeReponse, Niveau, Question, QuestionDepartage } fr
 export interface Avatar {
   initiales: string;
   couleur: string;
+  /** variation du dessin (le joueur peut changer de look) */
+  graine?: number;
 }
 
 export interface Profil {
@@ -126,14 +128,14 @@ export function genererAdversaires(nb: number, rng: Rng, exclure: string[] = [],
   });
 }
 
-export function creerJoueur(prenom: string): Participant {
+export function creerJoueur(prenom: string, graine = 0): Participant {
   return {
     id: ID_JOUEUR,
     prenom,
     feminin: false,
     metier: '',
     ville: '',
-    avatar: { initiales: initiales(prenom || 'Moi'), couleur: '#ffc83d' },
+    avatar: { initiales: initiales(prenom || 'Moi'), couleur: '#ffc83d', graine },
     estJoueur: true,
     profil: { force: 0, categories: {}, audace: 0 },
   };

@@ -6,6 +6,7 @@ import { NOM_MODE } from '../logique/scores';
 import type { ModeReponse, Question } from '../logique/types';
 import { sons } from '../son';
 import { Avatar } from './Avatar';
+import type { EtatPupitre } from './Plateau';
 
 export interface ItemDefile {
   participant: Participant;
@@ -29,13 +30,53 @@ interface Props {
   onFin: () => void;
   /** affiché une fois le défilé terminé (tableau des scores…) */
   apres?: ComponentChildren;
+  /** plateau affiché au-dessus (remplace la liste des réponses déjà données) */
+  scene?: (etat: EtatDefile) => ComponentChildren;
+}
+
+export interface EtatDefile {
+  index: number;
+  phase: 'reflexion' | 'reponse';
+  fini: boolean;
+}
+
+/**
+ * États des pupitres pendant un défilé : buzzers allumés pour ceux qui ont répondu,
+ * projecteur et bulle sur celui qui répond, scores mis à jour au fil des réponses.
+ */
+export function etatsDefile(
+  items: ItemDefile[],
+  correction: boolean,
+  etat: EtatDefile,
+  depart: Record<string, EtatPupitre>,
+): Record<string, EtatPupitre> {
+  const etats: Record<string, EtatPupitre> = {};
+  for (const [id, e] of Object.entries(depart)) etats[id] = { ...e };
+  items.forEach((it, i) => {
+    const e = (etats[it.participant.id] ??= {});
+    const revele = etat.fini || i < etat.index || (i === etat.index && etat.phase === 'reponse');
+    if (revele) {
+      e.buzzer = correction ? (it.correct ? 'juste' : 'faux') : 'appuye';
+      if (correction && e.score !== undefined) e.score += it.points;
+    }
+    if (!etat.fini && i === etat.index) {
+      e.eclaire = true;
+      e.bulle = etat.phase === 'reflexion' ? '…' : `« ${it.saisie} »`;
+      e.gain = etat.phase === 'reponse' && correction ? it.points : null;
+    }
+  });
+  if (!etat.fini) {
+    const actif = items[etat.index]?.participant.id;
+    for (const [id, e] of Object.entries(etats)) if (id !== actif) e.attenue = true;
+  }
+  return etats;
 }
 
 /**
  * Les réponses des adversaires, l'une après l'autre, avec un temps de réflexion simulé.
  * « Accélérer » va quatre fois plus vite, « Passer » montre tout d'un coup.
  */
-export function Defile({ titre, questionCommune, items, correction, libelleFin, onFin, apres }: Props) {
+export function Defile({ titre, questionCommune, items, correction, libelleFin, onFin, apres, scene }: Props) {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<'reflexion' | 'reponse'>('reflexion');
   const [rapide, setRapide] = useState(false);
@@ -48,8 +89,8 @@ export function Defile({ titre, questionCommune, items, correction, libelleFin, 
     const t = setTimeout(() => {
       if (phase === 'reflexion') {
         setPhase('reponse');
-        if (correction) (items[index].correct ? sons.bonne : sons.mauvaise)();
-        else sons.clic();
+        sons.buzz();
+        if (correction) setTimeout(items[index].correct ? sons.bonne : sons.mauvaise, 220);
       } else {
         setPhase('reflexion');
         setIndex(index + 1);
@@ -73,6 +114,7 @@ export function Defile({ titre, questionCommune, items, correction, libelleFin, 
   return (
     <div class="defile">
       <p class="petit-titre">{titre}</p>
+      {scene?.({ index, phase, fini })}
 
       {questionCommune && (
         <div class="question-commune">
@@ -83,7 +125,7 @@ export function Defile({ titre, questionCommune, items, correction, libelleFin, 
         </div>
       )}
 
-      {passes.length > 0 && (
+      {!scene && passes.length > 0 && (
         <ul class="defile-liste">
           {passes.map((it) => (
             <li key={it.participant.id + (it.question?.id ?? '')}>

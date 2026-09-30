@@ -48,6 +48,11 @@ export const sons = {
     note(165, 0.18, 0.4, 'sawtooth', 0.09);
   },
   tictac: () => note(1200, 0, 0.05, 'square', 0.04),
+  /** coup de buzzer */
+  buzz: () => {
+    note(140, 0, 0.18, 'square', 0.1);
+    note(147, 0, 0.18, 'sawtooth', 0.06);
+  },
   /** montée de tension avant une révélation */
   suspense: () => {
     [196, 220, 247, 262, 294, 330].forEach((f, i) => note(f, i * 0.22, 0.2, 'triangle', 0.07));

@@ -5,7 +5,8 @@ import { MOTIFS_SIGNALEMENT } from '../logique/types';
 import { useAppli } from '../navigation';
 import { partagerJSON } from '../outils/fichiers';
 import { ecrireEtatCarriere, lireEtatCarriere } from '../jeu/carriere';
-import { initiales } from '../logique/adversaires';
+import { Avatar } from '../composants/Avatar';
+import { creerJoueur, initiales } from '../logique/adversaires';
 import {
   exporterDonnees,
   importerDonnees,
@@ -58,6 +59,16 @@ export function EcranReglages() {
     }
   };
 
+  const changerLook = async () => {
+    const avatarGraine = reglages.avatarGraine + 1;
+    changerReglages({ avatarGraine });
+    const etat = await lireEtatCarriere();
+    if (etat.champion.participant.estJoueur) {
+      const participant = { ...etat.champion.participant, avatar: { ...etat.champion.participant.avatar, graine: avatarGraine } };
+      await ecrireEtatCarriere({ ...etat, champion: { ...etat.champion, participant } });
+    }
+  };
+
   const sauvegarder = async () => {
     await partagerJSON(`paulo-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`, await exporterDonnees());
   };
@@ -100,6 +111,12 @@ export function EcranReglages() {
 
       <section class="bloc">
         <h2 class="petit-titre">Jeu</h2>
+        <div class="ligne-avatar">
+          <Avatar p={creerJoueur(prenom, reglages.avatarGraine)} taille={64} />
+          <button class="bouton secondaire petit" onClick={changerLook}>
+            🎲 Changer de look
+          </button>
+        </div>
         <label class="ligne-prenom">
           <span>Ton prénom sur le plateau</span>
           <input

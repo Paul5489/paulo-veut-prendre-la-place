@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import { Avatar, presentation } from '../../composants/Avatar';
+import { presentation } from '../../composants/Avatar';
+import { Fauteuil } from '../../composants/Plateau';
 import { Interrupteur } from '../../composants/Interrupteur';
 import {
   ecrireEtatCarriere,
@@ -96,7 +97,7 @@ export function CarriereAccueil() {
 
       <div class="fauteuil-champion">
         <p class="petit-titre">{joueurChampion ? 'Le champion, c’est toi !' : 'Champion en titre'}</p>
-        <Avatar p={ch.participant} taille={72} couronne />
+        <Fauteuil p={ch.participant} taille={64} />
         <strong>{joueurChampion ? `${ch.participant.prenom} (toi)` : ch.participant.prenom}</strong>
         {!joueurChampion && <span class="doux">{presentation(ch.participant)}</span>}
         <span class="or">

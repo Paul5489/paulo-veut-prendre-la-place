@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Avatar } from '../../composants/Avatar';
-import { CarteQuestion } from '../../composants/CarteQuestion';
-import { Defile } from '../../composants/Defile';
+import { Defile, etatsDefile, type ItemDefile } from '../../composants/Defile';
+import { Plateau, type EtatPupitre } from '../../composants/Plateau';
 import { SaisieNombre } from '../../composants/SaisieNombre';
 import { TableauScores, type StatutLigne } from '../../composants/TableauScores';
 import {
@@ -21,7 +21,33 @@ import { NOM_MODE } from '../../logique/scores';
 import { NIVEAUX } from '../../logique/types';
 import { sons } from '../../son';
 import { marquerVues } from '../../stockage/db';
-import { accord, BandeauEtape, cloner, itemDefile, noter, versEnregistree, type PropsEtape } from './commun';
+import type { Participant } from '../../logique/adversaires';
+import type { ReponseEnregistree } from '../../logique/carriere';
+import {
+  accord,
+  BandeauEtape,
+  cloner,
+  itemDefile,
+  noter,
+  pupitres,
+  QuestionSurPlateau,
+  versEnregistree,
+  type PropsEtape,
+} from './commun';
+
+/** Le plateau pendant le tour des adversaires ; le buzzer du joueur reste allumé selon sa réponse. */
+function scenePlateau(
+  participants: Participant[],
+  scores: Record<string, number>,
+  items: ItemDefile[],
+  reponseJoueur?: ReponseEnregistree,
+) {
+  const depart = pupitres(participants, scores);
+  if (reponseJoueur && depart[ID_JOUEUR]) depart[ID_JOUEUR].buzzer = reponseJoueur.correct ? 'juste' : 'faux';
+  return (etat: Parameters<typeof etatsDefile>[2]) => (
+    <Plateau participants={participants} etats={etatsDefile(items, true, etat, depart)} />
+  );
+}
 
 const MAX_QUALIFS = 19;
 const MAX_COMPET = 27;
@@ -37,16 +63,7 @@ export function EtapeQualifs({ p, maj, chrono }: PropsEtape) {
   const autres = p.candidats.filter((c) => !c.estJoueur);
   const dernier = p.pas === 9;
   const suite = () => maj(dernier ? terminerQualifs({ ...p, pas: 10 }) : { ...p, pas: p.pas + 1 });
-  const apres = () => {
-    const scores = scoresQualifs({ ...p, pas: p.pas + 1 });
-    return (
-      <TableauScores
-        titre="Tableau des Qualifs"
-        max={MAX_QUALIFS}
-        lignes={p.candidats.map((c) => ({ participant: c, score: scores[c.id] ?? 0 }))}
-      />
-    );
-  };
+  const scores = scoresQualifs(p);
 
   if (unite < 3) {
     const c = q.collectives[unite];
@@ -54,8 +71,10 @@ export function EtapeQualifs({ p, maj, chrono }: PropsEtape) {
       return (
         <>
           <BandeauEtape titre={`Question collective ${unite + 1}/3`} detail={`Tout le monde répond à la même question · ${NOM_MODE[c.mode]} imposé`} />
-          <CarteQuestion
+          <QuestionSurPlateau
             key={c.question.id}
+            participants={p.candidats}
+            scores={scores}
             question={c.question}
             chrono={chrono}
             modeImpose={c.mode}
@@ -72,15 +91,16 @@ export function EtapeQualifs({ p, maj, chrono }: PropsEtape) {
         </>
       );
     }
+    const items = autres.map((a) => itemDefile(a, c.reponses[a.id]));
     return (
       <Defile
         key={p.pas}
         titre={`Les autres candidats · ${NOM_MODE[c.mode]}`}
         questionCommune={c.question}
         correction
-        items={autres.map((a) => itemDefile(a, c.reponses[a.id]))}
+        items={items}
+        scene={scenePlateau(p.candidats, scores, items, c.reponses[ID_JOUEUR])}
         libelleFin={unite === 2 ? 'Questions individuelles' : 'Question suivante'}
-        apres={apres()}
         onFin={suite}
       />
     );
@@ -93,8 +113,10 @@ export function EtapeQualifs({ p, maj, chrono }: PropsEtape) {
     return (
       <>
         <BandeauEtape titre={`Questions individuelles · tour ${tour + 1}/2`} detail="À toi ! Choisis ton mode de réponse." />
-        <CarteQuestion
+        <QuestionSurPlateau
           key={x.question.id}
+          participants={p.candidats}
+          scores={scores}
           question={x.question}
           chrono={chrono}
           libelleSuivant="Voir les autres candidats"
@@ -111,14 +133,15 @@ export function EtapeQualifs({ p, maj, chrono }: PropsEtape) {
     );
   }
   const leurs = liste.filter((y) => y.candidat !== ID_JOUEUR);
+  const items = leurs.map((y) => itemDefile(trouver(p, y.candidat), y.reponse!, y.question));
   return (
     <Defile
       key={p.pas}
       titre={`Les autres candidats · tour ${tour + 1}/2`}
       correction
-      items={leurs.map((y) => itemDefile(trouver(p, y.candidat), y.reponse!, y.question))}
+      items={items}
+      scene={scenePlateau(p.candidats, scores, items, liste.find((y) => y.candidat === ID_JOUEUR)?.reponse)}
       libelleFin={dernier ? 'Résultats des Qualifs' : 'Tour suivant'}
-      apres={apres()}
       onFin={() => {
         marquerVues(leurs.map((y) => y.question));
         suite();
@@ -217,6 +240,15 @@ export function EtapeBilanQualifs({ p, maj, occupe }: PropsEtape) {
         titre="Fin des Qualifs"
         detail={qualifie ? 'Bravo, tu es qualifié pour la Compet’ !' : 'Tu es éliminé aux Qualifs… La suite se jouera sans toi.'}
       />
+      <Plateau
+        participants={p.candidats}
+        etats={Object.fromEntries(
+          p.candidats.map((c): [string, EtatPupitre] => {
+            const ok = p.qualifies.includes(c.id);
+            return [c.id, { score: scores[c.id] ?? 0, buzzer: ok ? 'juste' : 'eteint', attenue: !ok, statut: ok ? 'Qualifié' : 'Éliminé' }];
+          }),
+        )}
+      />
       <TableauScores
         max={MAX_QUALIFS}
         lignes={p.candidats.map((c) => ({
@@ -247,7 +279,7 @@ export function EtapeCompet({ p, maj, chrono }: PropsEtape) {
   const qp = c.questions[unite];
   const qualifies = p.qualifies.map((id) => trouver(p, id));
   const dernier = p.pas === 15;
-  const scores = scoresCompet({ ...p, pas: p.pas + 1 });
+  const scores = scoresCompet(p);
 
   if (tourJoueur) {
     return (
@@ -255,8 +287,10 @@ export function EtapeCompet({ p, maj, chrono }: PropsEtape) {
         <BandeauEtape titre={`Compet’ · ${c.theme.titre}`} detail={`Question ${unite + 1}/8 · ${NOM_MODE[qp.mode]} imposé`}>
           {unite === 0 && <p class="annonce-theme">🎯 Le thème : {c.theme.description}</p>}
         </BandeauEtape>
-        <CarteQuestion
+        <QuestionSurPlateau
           key={qp.question.id}
+          participants={qualifies}
+          scores={scores}
           question={qp.question}
           chrono={chrono}
           modeImpose={qp.mode}
@@ -273,21 +307,16 @@ export function EtapeCompet({ p, maj, chrono }: PropsEtape) {
       </>
     );
   }
+  const items = qualifies.filter((x) => !x.estJoueur).map((x) => itemDefile(x, qp.reponses[x.id]));
   return (
     <Defile
       key={p.pas}
       titre={`Les autres candidats · ${NOM_MODE[qp.mode]}`}
       questionCommune={qp.question}
       correction
-      items={qualifies.filter((x) => !x.estJoueur).map((x) => itemDefile(x, qp.reponses[x.id]))}
+      items={items}
+      scene={scenePlateau(qualifies, scores, items, qp.reponses[ID_JOUEUR])}
       libelleFin={dernier ? 'La super cash' : 'Question suivante'}
-      apres={
-        <TableauScores
-          titre="Tableau de la Compet’"
-          max={MAX_COMPET}
-          lignes={qualifies.map((x) => ({ participant: x, score: scores[x.id] ?? 0 }))}
-        />
-      }
       onFin={() => maj(dernier ? preparerSuperCash(p) : { ...p, pas: p.pas + 1 })}
     />
   );
@@ -296,6 +325,8 @@ export function EtapeCompet({ p, maj, chrono }: PropsEtape) {
 export function EtapeSuperCash({ p, maj, chrono }: PropsEtape) {
   const c = p.compet!;
   const champion = p.champion;
+  const qualifies = p.qualifies.map((id) => trouver(p, id));
+  const scores = scoresCompet(p);
 
   if (p.pas === 0) {
     return (
@@ -303,6 +334,15 @@ export function EtapeSuperCash({ p, maj, chrono }: PropsEtape) {
         <BandeauEtape
           titre="💥 La super cash"
           detail={`${champion.prenom}, ${accord(champion, 'le champion', 'la championne')}, attribue à chacun une question cash sur le thème : +5 si elle est juste, −5 si elle est fausse. Les plus difficiles vont aux candidats qu'${champion.feminin ? 'elle' : 'il'} juge les plus dangereux.`}
+        />
+        <Plateau
+          participants={qualifies}
+          etats={Object.fromEntries(
+            c.superCash.map((x): [string, EtatPupitre] => [
+              x.candidat,
+              { score: scores[x.candidat] ?? 0, bulle: NIVEAUX[x.question.niveau - 1].nom, eclaire: x.question.niveau >= 3 },
+            ]),
+          )}
         />
         <ul class="liste-attribution">
           {c.superCash.map((x) => {
@@ -328,8 +368,10 @@ export function EtapeSuperCash({ p, maj, chrono }: PropsEtape) {
     return (
       <>
         <BandeauEtape titre="Ta super cash" detail="+5 si c'est juste, −5 si c'est faux." />
-        <CarteQuestion
+        <QuestionSurPlateau
           key={x.question.id}
+          participants={qualifies}
+          scores={scores}
           question={x.question}
           chrono={chrono}
           modeImpose="cash"
@@ -349,20 +391,14 @@ export function EtapeSuperCash({ p, maj, chrono }: PropsEtape) {
   }
 
   const leurs = c.superCash.filter((y) => y.candidat !== ID_JOUEUR);
-  const scores = scoresCompet({ ...p, pas: 3 });
+  const items = leurs.map((y) => itemDefile(trouver(p, y.candidat), y.reponse!, y.question));
   return (
     <Defile
       titre="Les super cash des autres candidats"
       correction
-      items={leurs.map((y) => itemDefile(trouver(p, y.candidat), y.reponse!, y.question))}
+      items={items}
+      scene={scenePlateau(qualifies, scores, items, c.superCash.find((y) => y.candidat === ID_JOUEUR)?.reponse)}
       libelleFin="Résultats de la Compet’"
-      apres={
-        <TableauScores
-          titre="Tableau de la Compet’"
-          max={MAX_COMPET}
-          lignes={p.qualifies.map((id) => ({ participant: trouver(p, id), score: scores[id] ?? 0 }))}
-        />
-      }
       onFin={() => {
         marquerVues(leurs.map((y) => y.question));
         maj(terminerCompet({ ...p, pas: 3 }));
@@ -394,13 +430,16 @@ export function EtapeBilanCompet({ p, maj, occupe }: PropsEtape) {
           ⚖️ Égalité en tête ! {champion.prenom} choisit son challenger : {champion.feminin ? 'elle' : 'il'} prend celui qu'{champion.feminin ? 'elle' : 'il'} juge le moins dangereux, {challenger.estJoueur ? 'toi' : challenger.prenom}.
         </p>
       )}
-      <TableauScores
-        max={MAX_COMPET}
-        lignes={p.qualifies.map((id) => ({
-          participant: trouver(p, id),
-          score: scores[id] ?? 0,
-          statut: id === p.challenger ? ('challenger' as StatutLigne) : undefined,
-        }))}
+      <Plateau
+        participants={p.qualifies.map((id) => trouver(p, id))}
+        etats={Object.fromEntries(
+          p.qualifies.map((id): [string, EtatPupitre] => [
+            id,
+            id === p.challenger
+              ? { score: scores[id] ?? 0, buzzer: 'juste', eclaire: true, statut: 'Challenger' }
+              : { score: scores[id] ?? 0, attenue: true },
+          ]),
+        )}
       />
       <button
         class="bouton principal grand"
