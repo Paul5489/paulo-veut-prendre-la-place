@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { verifierCash } from '../logique/cash';
 import { CATEGORIES_PAR_ID } from '../logique/categories';
 import { construirePropositions } from '../logique/propositions';
-import { POINTS, pointsObtenus } from '../logique/scores';
+import { POINTS, pointsObtenus, pointsSuperCash } from '../logique/scores';
 import { NIVEAUX, type ModeReponse, type Question } from '../logique/types';
 import { sons } from '../son';
 import { signalerQuestion } from '../stockage/db';
@@ -58,13 +58,28 @@ interface Props {
   modeImpose?: ModeReponse;
   libelleSuivant: string;
   onSuivant: (r: ResultatQuestion) => void;
+  /** super cash de la Compet' : +5 si juste, −5 si faux */
+  superCash?: boolean;
+  /** Défi, côté challenger : la correction reste cachée jusqu'à la révélation */
+  differee?: boolean;
+  /** score potentiel déjà accumulé (mode différé) */
+  potentiel?: number;
 }
 
 /**
  * Une question, de la lecture à la correction :
  * choix du mode (duo / carré / cash) → réponse → bonne réponse, anecdote, contestation, signalement.
  */
-export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant, onSuivant }: Props) {
+export function CarteQuestion({
+  question: q,
+  chrono,
+  modeImpose,
+  libelleSuivant,
+  onSuivant,
+  superCash = false,
+  differee = false,
+  potentiel = 0,
+}: Props) {
   const [mode, setMode] = useState<ModeReponse | null>(modeImpose ?? null);
   const [reponse, setReponse] = useState<string | null>(null);
   const [saisie, setSaisie] = useState('');
@@ -79,7 +94,8 @@ export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant,
   const corriger = (ok: boolean) => {
     setCorrect(ok);
     setCorrigee(true);
-    if (ok) sons.bonne();
+    if (differee) sons.clic();
+    else if (ok) sons.bonne();
     else sons.mauvaise();
   };
 
@@ -115,11 +131,12 @@ export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant,
     sons.bonne();
   };
 
-  const points = pointsObtenus(mode, correct);
+  const points = superCash ? pointsSuperCash(correct) : pointsObtenus(mode, correct);
   const categorie = CATEGORIES_PAR_ID[q.categorie];
 
   const classeProposition = (p: string) => {
     if (!corrigee) return 'proposition';
+    if (differee) return p === reponse ? 'proposition choisie' : 'proposition eteinte';
     if (p === q.reponse) return 'proposition bonne';
     if (p === reponse) return 'proposition choisie-fausse';
     return 'proposition eteinte';
@@ -134,7 +151,7 @@ export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant,
         <span class={`chip niveau n${q.niveau}`}>{NIVEAUX[q.niveau - 1].nom}</span>
         {mode && (
           <span class={`chip mode-choisi ${mode}`}>
-            {NOM_BOUTON_MODE[mode]} +{POINTS[mode]}
+            {superCash ? 'Super cash ±5' : `${NOM_BOUTON_MODE[mode]} +${POINTS[mode]}`}
           </span>
         )}
       </div>
@@ -193,7 +210,26 @@ export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant,
         </form>
       )}
 
-      {corrigee && (
+      {corrigee && differee && (
+        <div class="correction neutre">
+          <div class="verdict">
+            <span>{tempsEcoule ? '⏱️ Temps écoulé !' : '📝 Réponse enregistrée'}</span>
+          </div>
+          {reponse !== null && <p class="ta-reponse">Ta réponse : « {reponse} »</p>}
+          <p class="doux">
+            La correction sera révélée à la fin du Défi. Score potentiel :{' '}
+            <strong>{potentiel + (mode && !tempsEcoule ? POINTS[mode] : 0)} points</strong>
+          </p>
+          <button
+            class="bouton principal"
+            onClick={() => onSuivant({ question: q, mode, correct, contestee, saisie: reponse, points, tempsEcoule })}
+          >
+            {libelleSuivant} →
+          </button>
+        </div>
+      )}
+
+      {corrigee && !differee && (
         <div class={`correction ${correct ? 'juste' : 'faux'}`}>
           <div class="verdict">
             <span>
@@ -206,6 +242,7 @@ export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant,
                   : '❌ Mauvaise réponse'}
             </span>
             {points > 0 && <span class="gain">+{points}</span>}
+            {points < 0 && <span class="gain perte">{points}</span>}
           </div>
           {mode === 'cash' && reponse !== null && <p class="ta-reponse">Ta réponse : « {reponse} »</p>}
           {(mode === 'cash' || !mode || !correct) && (

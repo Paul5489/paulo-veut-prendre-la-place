@@ -417,12 +417,13 @@ Script de contrôle `npm run check-questions` :
 
 ### Organisation du code
 
-- `src/logique/` : règles pures et testées (texte, cash, scores, tirage, propositions, hasard, types, catégories).
+- `src/logique/` : règles pures et testées (texte, cash, scores, tirage, propositions, hasard, types, catégories, **adversaires**, **carriere**).
 - `src/stockage/db.ts` : IndexedDB (historique, journal, signalements, réglages, records, questions IA).
 - `src/donnees/banque.ts` : chargement de la banque, fichier par fichier.
-- `src/jeu/` : préparation des parties.
+- `src/jeu/` : préparation des parties (`partieRapide.ts`, `carriere.ts` : déroulé complet d'une émission, enregistré après chaque étape pour la reprise).
 - `src/composants/` : `CarteQuestion` (une question, du choix du mode à la correction), modale de signalement, etc.
-- `src/ecrans/` : Accueil, Partie rapide (config, jeu, fin), Réglages.
+- `src/ecrans/` : Accueil, Partie rapide (config, jeu, fin), Réglages, `carriere/` (accueil Carrière, partie, manches, Défi, palmarès).
+- `src/composants/` : aussi `Avatar`, `TableauScores` (lignes qui glissent), `Defile` (réponses des adversaires avec Accélérer/Passer), `SaisieNombre`.
 - `public/data/` : la banque (`categories/*.json`, `themes/*.json`, `departage.json`, `index.json` généré).
 
 ### Écrire des questions
@@ -444,7 +445,23 @@ Script de contrôle `npm run check-questions` :
   - [x] Banque de départ : 331 questions générales, 20 thèmes (13 à 15 questions chacun), 30 départages, scripts de contrôle
   - [x] Partie rapide complète : choix du mode, cash tolérant, contestation, signalement, chrono, records par niveau
   - [x] Déploiement sur GitHub Pages (automatique à chaque envoi sur `main`)
-  - [ ] Installation et test sur l'iPhone par Paul → **Paul teste avant la phase 2**
+  - [x] Installation et test sur l'iPhone par Paul (validé le 30/09/2026)
+- Phase 2 (Carrière) :
+  - [x] Adversaires virtuels (identité, profil par catégorie, choix du mode selon la confiance, erreurs plausibles, temps de réflexion)
+  - [x] Qualifs (3 collectives + 2 tours individuels), départage numérique, Compet' (8 questions + super cash), Défi (thèmes, correction différée, révélation, contestation)
+  - [x] Fauteuil du champion : cagnotte, victoires, trophées, progression (option), préliminaires simulés quand Paul est champion
+  - [x] Palmarès, reprise de partie, statut sur l'accueil
+  - [x] Sauvegarde / restauration des données (avancée depuis la phase 5)
+  - [ ] Paul teste la Carrière
+
+### Choix de règles (phase 2)
+
+- Gagner le Défi compte comme la 1re victoire du nouveau champion (cagnotte de départ = score × 100 €).
+- Quand Paul est éliminé, la fin de l'émission est simulée en coulisses : le champion virtuel peut être détrôné par un autre candidat.
+- Quand Paul est champion, Qualifs et Compet' sont simulées sans questions réelles (scores seulement) ; en cas d'égalité en tête de Compet', c'est Paul qui choisit son challenger.
+- Les questions montrées pendant le tour des adversaires sont marquées « vues » (reproposées en dernier) sans entrer dans les statistiques de Paul.
+- Modèle des adversaires : compétence = niveau de la partie + force + bonus de catégorie (± progression) ; probabilité de réussite bornée entre 3 % et 97 %.
+- « Thème libre » : non proposé tant que la génération par IA n'existe pas (phase 4, optionnelle).
 
 ### Adresses
 

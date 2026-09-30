@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'preact/hooks';
 import { BanniereMiseAJour } from './composants/BanniereMiseAJour';
 import { Accueil } from './ecrans/Accueil';
+import { CarriereAccueil } from './ecrans/carriere/CarriereAccueil';
+import { Palmares } from './ecrans/carriere/Palmares';
+import { EcranPartieCarriere } from './ecrans/carriere/PartieCarriere';
 import { RapideConfig } from './ecrans/RapideConfig';
 import { RapideFin } from './ecrans/RapideFin';
 import { RapideJeu } from './ecrans/RapideJeu';
@@ -46,6 +49,9 @@ export function App() {
       {ecran.nom === 'rapide-jeu' && <RapideJeu key={cle} niveau={ecran.niveau} categorie={ecran.categorie} />}
       {ecran.nom === 'rapide-fin' && <RapideFin key={cle} {...ecran} />}
       {ecran.nom === 'reglages' && <EcranReglages key={cle} />}
+      {ecran.nom === 'carriere' && <CarriereAccueil key={cle} />}
+      {ecran.nom === 'carriere-partie' && <EcranPartieCarriere key={cle} />}
+      {ecran.nom === 'palmares' && <Palmares key={cle} />}
     </Contexte.Provider>
   );
 }

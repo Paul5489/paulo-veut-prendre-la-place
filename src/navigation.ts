@@ -15,7 +15,10 @@ export type Ecran =
       resultats: ResultatQuestion[];
       record: boolean;
     }
-  | { nom: 'reglages' };
+  | { nom: 'reglages' }
+  | { nom: 'carriere' }
+  | { nom: 'carriere-partie' }
+  | { nom: 'palmares' };
 
 export type Aller = (e: Ecran) => void;
 

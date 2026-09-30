@@ -48,6 +48,13 @@ export const sons = {
     note(165, 0.18, 0.4, 'sawtooth', 0.09);
   },
   tictac: () => note(1200, 0, 0.05, 'square', 0.04),
+  /** montée de tension avant une révélation */
+  suspense: () => {
+    [196, 220, 247, 262, 294, 330].forEach((f, i) => note(f, i * 0.22, 0.2, 'triangle', 0.07));
+  },
+  defaite: () => {
+    [392, 330, 262, 196].forEach((f, i) => note(f, i * 0.2, 0.35, 'sine', 0.1));
+  },
   victoire: () => {
     [523, 659, 784, 1047].forEach((f, i) => note(f, i * 0.12, 0.3, 'triangle'));
     note(1047, 0.5, 0.6, 'sine', 0.12);

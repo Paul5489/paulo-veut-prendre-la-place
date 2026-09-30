@@ -1,7 +1,31 @@
+import { useEffect, useState } from 'preact/hooks';
+import { lireEtatCarriere, lirePartie } from '../jeu/carriere';
+import { formaterEuros, type EtatCarriere } from '../logique/carriere';
 import { useAppli } from '../navigation';
 
 export function Accueil() {
   const { aller } = useAppli();
+  const [etat, setEtat] = useState<EtatCarriere | null>(null);
+  const [partieEnCours, setPartieEnCours] = useState(false);
+  useEffect(() => {
+    lireEtatCarriere().then(setEtat);
+    lirePartie().then((p) => setPartieEnCours(!!p));
+  }, []);
+
+  const ch = etat?.champion;
+  const statut = !ch ? (
+    <span>…</span>
+  ) : ch.participant.estJoueur ? (
+    <span>
+      <strong>Champion</strong> depuis {ch.victoires} victoire{ch.victoires > 1 ? 's' : ''}, cagnotte {formaterEuros(ch.cagnotte)}
+    </span>
+  ) : (
+    <span>
+      Statut : <strong>Candidat</strong> · champion en titre : {ch.participant.prenom} ({ch.victoires} victoire
+      {ch.victoires > 1 ? 's' : ''})
+    </span>
+  );
+
   return (
     <div class="ecran accueil">
       <div class="projecteurs" aria-hidden="true">
@@ -15,18 +39,16 @@ export function Accueil() {
       </header>
 
       <div class="statut">
-        <span class="statut-icone">🎤</span>
-        <span>
-          Statut : <strong>Candidat</strong>
-        </span>
+        <span class="statut-icone">{ch?.participant.estJoueur ? '👑' : '🎤'}</span>
+        {statut}
       </div>
 
       <nav class="modes-jeu">
-        <button class="mode-jeu carriere" disabled>
+        <button class="mode-jeu carriere" onClick={() => aller({ nom: 'carriere' })}>
           <span class="mode-emoji">🏆</span>
           <span class="mode-texte">
             <strong>Carrière</strong>
-            <small>Bientôt disponible</small>
+            <small>{partieEnCours ? 'Une partie t’attend : reprends-la !' : 'Qualifs, Compet’ et Défi contre le champion'}</small>
           </span>
         </button>
         <button class="mode-jeu duel" disabled>
