@@ -443,4 +443,12 @@ Script de contrôle `npm run check-questions` :
   - [x] Moteur testé : validation cash, scores, tirage sans répétition
   - [x] Banque de départ : 331 questions générales, 20 thèmes (13 à 15 questions chacun), 30 départages, scripts de contrôle
   - [x] Partie rapide complète : choix du mode, cash tolérant, contestation, signalement, chrono, records par niveau
-  - [ ] Déploiement sur GitHub Pages et installation sur l'iPhone (en attente du compte GitHub de Paul)
+  - [x] Déploiement sur GitHub Pages (automatique à chaque envoi sur `main`)
+  - [ ] Installation et test sur l'iPhone par Paul → **Paul teste avant la phase 2**
+
+### Adresses
+
+- Appli : https://paul5489.github.io/paulo-veut-prendre-la-place/
+- Dépôt (public) : https://github.com/Paul5489/paulo-veut-prendre-la-place
+- Le Mac est connecté au compte GitHub de Paul via l'outil `gh` (installé avec Homebrew) : `git push` suffit pour publier.
+- À faire plus tard : mettre à jour les versions des actions GitHub (avertissement « Node.js 20 is deprecated »), sans urgence.
