@@ -1,0 +1,264 @@
+{
+  "categories": {
+    "arts": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 6,
+        "2": 7,
+        "3": 7,
+        "4": 5
+      }
+    },
+    "cinema": {
+      "nb": 26,
+      "parNiveau": {
+        "1": 7,
+        "2": 7,
+        "3": 7,
+        "4": 5
+      }
+    },
+    "corps": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 6,
+        "2": 7,
+        "3": 7,
+        "4": 5
+      }
+    },
+    "gastronomie": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 7,
+        "2": 7,
+        "3": 7,
+        "4": 4
+      }
+    },
+    "geographie": {
+      "nb": 26,
+      "parNiveau": {
+        "1": 6,
+        "2": 8,
+        "3": 7,
+        "4": 5
+      }
+    },
+    "histoire": {
+      "nb": 26,
+      "parNiveau": {
+        "1": 6,
+        "2": 7,
+        "3": 7,
+        "4": 6
+      }
+    },
+    "insolite": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 6,
+        "2": 8,
+        "3": 7,
+        "4": 4
+      }
+    },
+    "litterature": {
+      "nb": 26,
+      "parNiveau": {
+        "1": 6,
+        "2": 7,
+        "3": 7,
+        "4": 6
+      }
+    },
+    "mythologie": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 7,
+        "2": 8,
+        "3": 6,
+        "4": 4
+      }
+    },
+    "nature": {
+      "nb": 26,
+      "parNiveau": {
+        "1": 7,
+        "2": 7,
+        "3": 7,
+        "4": 5
+      }
+    },
+    "sciences": {
+      "nb": 26,
+      "parNiveau": {
+        "1": 6,
+        "2": 8,
+        "3": 6,
+        "4": 6
+      }
+    },
+    "societe": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 6,
+        "2": 7,
+        "3": 7,
+        "4": 5
+      }
+    },
+    "sport": {
+      "nb": 25,
+      "parNiveau": {
+        "1": 6,
+        "2": 7,
+        "3": 7,
+        "4": 5
+      }
+    }
+  },
+  "themes": [
+    {
+      "id": "asterix",
+      "titre": "Astérix le Gaulois",
+      "categorie": "litterature",
+      "description": "Le petit village qui résiste encore et toujours à l'envahisseur, ses habitants et ses auteurs.",
+      "nb": 13
+    },
+    {
+      "id": "capitales-europeennes",
+      "titre": "Les capitales européennes",
+      "categorie": "geographie",
+      "description": "Des grandes capitales aux plus discrètes, de Lisbonne à Riga.",
+      "nb": 14
+    },
+    {
+      "id": "chanson-annees-80",
+      "titre": "La chanson française des années 80",
+      "categorie": "arts",
+      "description": "Les tubes qui ont fait danser la France, de « L'Aventurier » à « Nuit de folie ».",
+      "nb": 14
+    },
+    {
+      "id": "coeur-et-sang",
+      "titre": "Le cœur et le sang",
+      "categorie": "corps",
+      "description": "La pompe de notre corps, ses vaisseaux, le sang et les pionniers de la cardiologie.",
+      "nb": 13
+    },
+    {
+      "id": "dinosaures",
+      "titre": "Les dinosaures",
+      "categorie": "nature",
+      "description": "Géants du Mésozoïque, fossiles célèbres et grande extinction.",
+      "nb": 13
+    },
+    {
+      "id": "films-hitchcock",
+      "titre": "Les films d'Alfred Hitchcock",
+      "categorie": "cinema",
+      "description": "Le maître du suspense : ses films, ses acteurs, ses secrets de tournage.",
+      "nb": 13
+    },
+    {
+      "id": "fromages-de-france",
+      "titre": "Les fromages de France",
+      "categorie": "gastronomie",
+      "description": "Pâtes molles, persillées ou cuites : un tour de France des plateaux de fromages.",
+      "nb": 13
+    },
+    {
+      "id": "grandes-inventions",
+      "titre": "Les grandes inventions",
+      "categorie": "sciences",
+      "description": "Imprimerie, cinéma, téléphone, avion… et les inventeurs qui ont changé le monde.",
+      "nb": 13
+    },
+    {
+      "id": "harry-potter",
+      "titre": "L'univers de Harry Potter",
+      "categorie": "litterature",
+      "description": "Les romans du jeune sorcier : personnages, créatures, sortilèges et objets magiques.",
+      "nb": 14
+    },
+    {
+      "id": "jeux-olympiques",
+      "titre": "Les Jeux olympiques",
+      "categorie": "sport",
+      "description": "Symboles, légendes et grandes éditions des Jeux, de l'Antiquité à Paris 2024.",
+      "nb": 13
+    },
+    {
+      "id": "louis-de-funes",
+      "titre": "Les films de Louis de Funès",
+      "categorie": "cinema",
+      "description": "Gendarmes, restaurateurs et industriels colériques : la filmographie d'un géant du rire.",
+      "nb": 13
+    },
+    {
+      "id": "mythologie-grecque",
+      "titre": "La mythologie grecque",
+      "categorie": "mythologie",
+      "description": "Dieux de l'Olympe, héros, monstres et Titans de la Grèce antique.",
+      "nb": 15
+    },
+    {
+      "id": "napoleon",
+      "titre": "Napoléon Ier",
+      "categorie": "histoire",
+      "description": "La vie de l'Empereur, de la Corse à Sainte-Hélène : batailles, famille et héritage.",
+      "nb": 13
+    },
+    {
+      "id": "peintres-impressionnistes",
+      "titre": "Les peintres impressionnistes",
+      "categorie": "arts",
+      "description": "Monet, Degas, Renoir, Morisot… les peintres de la lumière et leurs chefs-d'œuvre.",
+      "nb": 13
+    },
+    {
+      "id": "revolution-francaise",
+      "titre": "La Révolution française",
+      "categorie": "histoire",
+      "description": "De la prise de la Bastille à la chute de Robespierre : acteurs, lieux et dates.",
+      "nb": 13
+    },
+    {
+      "id": "rois-de-france",
+      "titre": "Les rois de France",
+      "categorie": "histoire",
+      "description": "De Hugues Capet à Louis-Philippe, surnoms, règnes et grands événements.",
+      "nb": 13
+    },
+    {
+      "id": "systeme-solaire",
+      "titre": "Le système solaire",
+      "categorie": "sciences",
+      "description": "Planètes, lunes, sondes et records de notre voisinage cosmique.",
+      "nb": 13
+    },
+    {
+      "id": "tour-de-france",
+      "titre": "Le Tour de France",
+      "categorie": "sport",
+      "description": "Maillots, cols mythiques et champions de la Grande Boucle depuis 1903.",
+      "nb": 13
+    },
+    {
+      "id": "ve-republique",
+      "titre": "La Ve République",
+      "categorie": "societe",
+      "description": "Présidents, institutions et grandes dates de la République depuis 1958.",
+      "nb": 13
+    },
+    {
+      "id": "volcans",
+      "titre": "Les volcans",
+      "categorie": "geographie",
+      "description": "Éruptions célèbres, volcans de France et du monde, vocabulaire des volcanologues.",
+      "nb": 13
+    }
+  ],
+  "departage": 30
+}
