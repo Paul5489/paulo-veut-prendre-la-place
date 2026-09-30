@@ -1,0 +1,251 @@
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { verifierCash } from '../logique/cash';
+import { CATEGORIES_PAR_ID } from '../logique/categories';
+import { construirePropositions } from '../logique/propositions';
+import { POINTS, pointsObtenus } from '../logique/scores';
+import { NIVEAUX, type ModeReponse, type Question } from '../logique/types';
+import { sons } from '../son';
+import { signalerQuestion } from '../stockage/db';
+import { ModalSignalement } from './ModalSignalement';
+
+export interface ResultatQuestion {
+  question: Question;
+  mode: ModeReponse | null;
+  correct: boolean;
+  contestee: boolean;
+  saisie: string | null;
+  points: number;
+  tempsEcoule: boolean;
+}
+
+export const DUREE_CHRONO = 20;
+
+/** Compte à rebours ; appelle `auBout` une seule fois quand il atteint zéro. */
+function useChrono(actif: boolean, auBout: () => void): number {
+  const [restant, setRestant] = useState(DUREE_CHRONO);
+  const debut = useRef(Date.now());
+  const rappel = useRef(auBout);
+  rappel.current = auBout;
+  useEffect(() => {
+    if (!actif) return;
+    let derniereSeconde = DUREE_CHRONO;
+    const id = setInterval(() => {
+      const r = Math.max(0, DUREE_CHRONO - (Date.now() - debut.current) / 1000);
+      setRestant(r);
+      const s = Math.ceil(r);
+      if (s < derniereSeconde && s <= 5 && s > 0) sons.tictac();
+      derniereSeconde = s;
+      if (r <= 0) {
+        clearInterval(id);
+        rappel.current();
+      }
+    }, 100);
+    return () => clearInterval(id);
+  }, [actif]);
+  return restant;
+}
+
+const DESCRIPTION_MODE: Record<ModeReponse, string> = {
+  duo: '2 propositions',
+  carre: '4 propositions',
+  cash: 'Sans proposition',
+};
+const NOM_BOUTON_MODE: Record<ModeReponse, string> = { duo: 'Duo', carre: 'Carré', cash: 'Cash' };
+
+interface Props {
+  question: Question;
+  chrono: boolean;
+  modeImpose?: ModeReponse;
+  libelleSuivant: string;
+  onSuivant: (r: ResultatQuestion) => void;
+}
+
+/**
+ * Une question, de la lecture à la correction :
+ * choix du mode (duo / carré / cash) → réponse → bonne réponse, anecdote, contestation, signalement.
+ */
+export function CarteQuestion({ question: q, chrono, modeImpose, libelleSuivant, onSuivant }: Props) {
+  const [mode, setMode] = useState<ModeReponse | null>(modeImpose ?? null);
+  const [reponse, setReponse] = useState<string | null>(null);
+  const [saisie, setSaisie] = useState('');
+  const [corrigee, setCorrigee] = useState(false);
+  const [correct, setCorrect] = useState(false);
+  const [contestee, setContestee] = useState(false);
+  const [tempsEcoule, setTempsEcoule] = useState(false);
+  const [signalement, setSignalement] = useState<'ferme' | 'ouvert' | 'fait'>('ferme');
+  const champ = useRef<HTMLInputElement>(null);
+  const propositions = useMemo(() => (mode ? construirePropositions(q, mode) : []), [q, mode]);
+
+  const corriger = (ok: boolean) => {
+    setCorrect(ok);
+    setCorrigee(true);
+    if (ok) sons.bonne();
+    else sons.mauvaise();
+  };
+
+  const restant = useChrono(chrono && !corrigee, () => {
+    setTempsEcoule(true);
+    corriger(false);
+  });
+
+  const choisirMode = (m: ModeReponse) => {
+    // Sur iPhone, le clavier ne s'ouvre que si le champ reçoit le focus pendant le toucher.
+    if (m === 'cash') champ.current?.focus();
+    sons.clic();
+    setMode(m);
+  };
+
+  const repondre = (p: string) => {
+    if (corrigee) return;
+    setReponse(p);
+    corriger(p === q.reponse);
+  };
+
+  const validerCash = (e: Event) => {
+    e.preventDefault();
+    if (corrigee || !saisie.trim()) return;
+    champ.current?.blur();
+    setReponse(saisie.trim());
+    corriger(verifierCash(saisie, q.reponse, q.variantes, q.mauvaises));
+  };
+
+  const contester = () => {
+    setContestee(true);
+    setCorrect(true);
+    sons.bonne();
+  };
+
+  const points = pointsObtenus(mode, correct);
+  const categorie = CATEGORIES_PAR_ID[q.categorie];
+
+  const classeProposition = (p: string) => {
+    if (!corrigee) return 'proposition';
+    if (p === q.reponse) return 'proposition bonne';
+    if (p === reponse) return 'proposition choisie-fausse';
+    return 'proposition eteinte';
+  };
+
+  return (
+    <div class="carte-question">
+      <div class="meta-question">
+        <span class="chip">
+          {categorie.emoji} {categorie.nom}
+        </span>
+        <span class={`chip niveau n${q.niveau}`}>{NIVEAUX[q.niveau - 1].nom}</span>
+        {mode && (
+          <span class={`chip mode-choisi ${mode}`}>
+            {NOM_BOUTON_MODE[mode]} +{POINTS[mode]}
+          </span>
+        )}
+      </div>
+
+      {chrono && (
+        <div class={`chrono ${restant <= 5 ? 'urgent' : ''}`} aria-label={`${Math.ceil(restant)} secondes`}>
+          <div class="chrono-barre" style={{ width: `${(restant / DUREE_CHRONO) * 100}%` }} />
+          <span>{Math.ceil(restant)} s</span>
+        </div>
+      )}
+
+      <p class="texte-question">{q.question}</p>
+
+      {!mode && !corrigee && (
+        <div class="choix-modes">
+          <p class="consigne">Choisis ton mode de réponse</p>
+          {(['duo', 'carre', 'cash'] as const).map((m) => (
+            <button key={m} class={`bouton-mode ${m}`} onClick={() => choisirMode(m)}>
+              <span class="nom-mode">{NOM_BOUTON_MODE[m]}</span>
+              <span class="detail-mode">{DESCRIPTION_MODE[m]}</span>
+              <span class="points-mode">+{POINTS[m]}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {mode && mode !== 'cash' && (
+        <div class={`propositions ${mode}`}>
+          {propositions.map((p) => (
+            <button key={p} class={classeProposition(p)} disabled={corrigee} onClick={() => repondre(p)}>
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!corrigee && (
+        <form class={`saisie-cash ${mode === 'cash' ? '' : 'cachee'}`} onSubmit={validerCash}>
+          <input
+            ref={champ}
+            type="text"
+            value={saisie}
+            onInput={(e) => setSaisie(e.currentTarget.value)}
+            placeholder="Tape ta réponse…"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck={false}
+            enterkeyhint="done"
+            aria-label="Ta réponse"
+            tabIndex={mode === 'cash' ? 0 : -1}
+          />
+          <button type="submit" class="bouton principal" disabled={!saisie.trim()}>
+            Valider
+          </button>
+        </form>
+      )}
+
+      {corrigee && (
+        <div class={`correction ${correct ? 'juste' : 'faux'}`}>
+          <div class="verdict">
+            <span>
+              {tempsEcoule
+                ? '⏱️ Temps écoulé !'
+                : correct
+                  ? contestee
+                    ? '✅ Validée après contestation'
+                    : '✅ Bonne réponse !'
+                  : '❌ Mauvaise réponse'}
+            </span>
+            {points > 0 && <span class="gain">+{points}</span>}
+          </div>
+          {mode === 'cash' && reponse !== null && <p class="ta-reponse">Ta réponse : « {reponse} »</p>}
+          {(mode === 'cash' || !mode || !correct) && (
+            <p class="bonne-reponse">
+              La réponse : <strong>{q.reponse}</strong>
+            </p>
+          )}
+          <p class="anecdote">💡 {q.anecdote}</p>
+          {mode === 'cash' && !correct && !tempsEcoule && (
+            <button class="bouton secondaire" onClick={contester}>
+              🙋 Contester : j'avais juste
+            </button>
+          )}
+          <button
+            class="bouton principal"
+            onClick={() =>
+              onSuivant({ question: q, mode, correct, contestee, saisie: reponse, points, tempsEcoule })
+            }
+          >
+            {libelleSuivant} →
+          </button>
+          <button
+            class="lien-signaler"
+            disabled={signalement === 'fait'}
+            onClick={() => setSignalement('ouvert')}
+          >
+            {signalement === 'fait' ? '✓ Question signalée et retirée du jeu' : '⚑ Signaler une erreur'}
+          </button>
+        </div>
+      )}
+
+      {signalement === 'ouvert' && (
+        <ModalSignalement
+          onAnnuler={() => setSignalement('ferme')}
+          onEnvoyer={(motif) => {
+            signalerQuestion(q, motif);
+            setSignalement('fait');
+          }}
+        />
+      )}
+    </div>
+  );
+}

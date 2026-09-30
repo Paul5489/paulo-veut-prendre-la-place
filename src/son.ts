@@ -1,0 +1,55 @@
+/**
+ * Petits effets sonores originaux, fabriqués à la volée (Web Audio) : aucun fichier audio.
+ */
+
+let contexte: AudioContext | null = null;
+let actif = true;
+
+export function activerSon(oui: boolean): void {
+  actif = oui;
+}
+
+function ctx(): AudioContext | null {
+  if (!actif) return null;
+  if (!contexte) {
+    const C = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!C) return null;
+    contexte = new C();
+  }
+  if (contexte.state === 'suspended') contexte.resume().catch(() => {});
+  return contexte;
+}
+
+function note(frequence: number, debut: number, duree: number, type: OscillatorType = 'sine', volume = 0.18): void {
+  const c = ctx();
+  if (!c) return;
+  const t = c.currentTime + debut;
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(frequence, t);
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(volume, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + duree);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + duree + 0.05);
+}
+
+export const sons = {
+  clic: () => note(660, 0, 0.08, 'triangle', 0.08),
+  bonne: () => {
+    note(523, 0, 0.15, 'triangle');
+    note(659, 0.1, 0.15, 'triangle');
+    note(784, 0.2, 0.35, 'triangle');
+  },
+  mauvaise: () => {
+    note(220, 0, 0.25, 'sawtooth', 0.09);
+    note(165, 0.18, 0.4, 'sawtooth', 0.09);
+  },
+  tictac: () => note(1200, 0, 0.05, 'square', 0.04),
+  victoire: () => {
+    [523, 659, 784, 1047].forEach((f, i) => note(f, i * 0.12, 0.3, 'triangle'));
+    note(1047, 0.5, 0.6, 'sine', 0.12);
+  },
+};
