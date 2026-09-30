@@ -33,9 +33,11 @@ export interface Signalement {
 export interface Reglages {
   son: boolean;
   chrono: boolean;
+  /** prénom affiché sur le plateau */
+  prenom: string;
 }
 
-export const REGLAGES_DEFAUT: Reglages = { son: true, chrono: false };
+export const REGLAGES_DEFAUT: Reglages = { son: true, chrono: false, prenom: 'Paulo' };
 
 /** Meilleur score de la partie rapide, par niveau */
 export type Records = Partial<Record<Niveau, number>>;
@@ -111,6 +113,52 @@ export async function enregistrerReponse(
   await tx.done;
 }
 
+/**
+ * Questions montrées pendant le tour des adversaires : elles comptent comme déjà vues
+ * (reproposées en dernier), sans entrer dans les statistiques du joueur.
+ */
+export async function marquerVues(questions: Question[]): Promise<void> {
+  if (!questions.length) return;
+  const d = await db();
+  const tx = d.transaction('historique', 'readwrite');
+  const maintenant = Date.now();
+  for (const q of questions) {
+    const avant = await tx.store.get(q.id);
+    if (avant) continue;
+    await tx.store.put({
+      id: q.id, categorie: q.categorie, theme: q.theme, niveau: q.niveau,
+      derniereVue: maintenant, reussie: true, mode: null, nbVues: 1, nbReussites: 0,
+    });
+  }
+  await tx.done;
+}
+
+/** Taux de réussite du joueur par catégorie (toutes parties confondues). */
+export async function tauxParCategorie(): Promise<Partial<Record<CategorieId, { bonnes: number; total: number }>>> {
+  const journal = await (await db()).getAll('journal');
+  const res: Partial<Record<CategorieId, { bonnes: number; total: number }>> = {};
+  for (const e of journal) {
+    const t = (res[e.categorie] ??= { bonnes: 0, total: 0 });
+    t.total++;
+    if (e.correct) t.bonnes++;
+  }
+  return res;
+}
+
+// --- Petites valeurs (réglages, records, carrière…) --------------------------
+
+export async function lireValeur<T>(cle: string): Promise<T | undefined> {
+  return (await (await db()).get('kv', cle)) as T | undefined;
+}
+
+export async function ecrireValeur(cle: string, valeur: unknown): Promise<void> {
+  await (await db()).put('kv', valeur, cle);
+}
+
+export async function supprimerValeur(cle: string): Promise<void> {
+  await (await db()).delete('kv', cle);
+}
+
 // --- Réglages et records -----------------------------------------------------
 
 export async function lireReglages(): Promise<Reglages> {
@@ -160,12 +208,59 @@ export async function restaurerQuestion(id: string): Promise<void> {
   await (await db()).delete('signalements', id);
 }
 
+// --- Sauvegarde et restauration ----------------------------------------------
+
+const MAGASINS = ['historique', 'journal', 'signalements', 'kv', 'questionsIA'] as const;
+
+export interface Sauvegarde {
+  type: 'paulo-sauvegarde';
+  version: 1;
+  date: string;
+  historique: EntreeHistorique[];
+  journal: EntreeJournal[];
+  signalements: Signalement[];
+  kv: { cle: string; valeur: unknown }[];
+  questionsIA: Question[];
+}
+
+/** Toutes les données du joueur, dans un seul objet à enregistrer en fichier. */
+export async function exporterDonnees(): Promise<Sauvegarde> {
+  const d = await db();
+  const cles = await d.getAllKeys('kv');
+  const kv = await Promise.all(cles.map(async (cle) => ({ cle, valeur: await d.get('kv', cle) })));
+  return {
+    type: 'paulo-sauvegarde',
+    version: 1,
+    date: new Date().toISOString(),
+    historique: await d.getAll('historique'),
+    journal: await d.getAll('journal'),
+    signalements: await d.getAll('signalements'),
+    kv,
+    questionsIA: await d.getAll('questionsIA'),
+  };
+}
+
+/** Remplace toutes les données par celles d'une sauvegarde. */
+export async function importerDonnees(s: Sauvegarde): Promise<void> {
+  if (s?.type !== 'paulo-sauvegarde' || !Array.isArray(s.historique) || !Array.isArray(s.kv)) {
+    throw new Error("Ce fichier n'est pas une sauvegarde de « Paulo veut prendre la place ».");
+  }
+  const d = await db();
+  const tx = d.transaction([...MAGASINS], 'readwrite');
+  await Promise.all(MAGASINS.map((n) => tx.objectStore(n).clear()));
+  for (const h of s.historique) await tx.objectStore('historique').put(h);
+  for (const j of s.journal ?? []) await tx.objectStore('journal').put(j);
+  for (const x of s.signalements ?? []) await tx.objectStore('signalements').put(x);
+  for (const { cle, valeur } of s.kv) await tx.objectStore('kv').put(valeur, cle);
+  for (const q of s.questionsIA ?? []) await tx.objectStore('questionsIA').put(q);
+  await tx.done;
+}
+
 // --- Remise à zéro -----------------------------------------------------------
 
 export async function toutEffacer(): Promise<void> {
   const d = await db();
-  const noms = ['historique', 'journal', 'signalements', 'kv', 'questionsIA'] as const;
-  const tx = d.transaction([...noms], 'readwrite');
-  await Promise.all(noms.map((n) => tx.objectStore(n).clear()));
+  const tx = d.transaction([...MAGASINS], 'readwrite');
+  await Promise.all(MAGASINS.map((n) => tx.objectStore(n).clear()));
   await tx.done;
 }
