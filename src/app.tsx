@@ -4,6 +4,8 @@ import { Accueil } from './ecrans/Accueil';
 import { CarriereAccueil } from './ecrans/carriere/CarriereAccueil';
 import { Palmares } from './ecrans/carriere/Palmares';
 import { EcranPartieCarriere } from './ecrans/carriere/PartieCarriere';
+import { DuelConfig } from './ecrans/duel/DuelConfig';
+import { EcranMatchDuel } from './ecrans/duel/Match';
 import { RapideConfig } from './ecrans/RapideConfig';
 import { RapideFin } from './ecrans/RapideFin';
 import { RapideJeu } from './ecrans/RapideJeu';
@@ -52,6 +54,8 @@ export function App() {
       {ecran.nom === 'carriere' && <CarriereAccueil key={cle} />}
       {ecran.nom === 'carriere-partie' && <EcranPartieCarriere key={cle} />}
       {ecran.nom === 'palmares' && <Palmares key={cle} />}
+      {ecran.nom === 'duel' && <DuelConfig key={cle} />}
+      {ecran.nom === 'duel-match' && <EcranMatchDuel key={cle} />}
     </Contexte.Provider>
   );
 }

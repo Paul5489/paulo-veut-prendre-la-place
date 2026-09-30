@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { lireEtatCarriere, lirePartie } from '../jeu/carriere';
+import { lireMatch } from '../jeu/duel';
 import { formaterEuros, type EtatCarriere } from '../logique/carriere';
 import { useAppli } from '../navigation';
 
@@ -7,9 +8,11 @@ export function Accueil() {
   const { aller } = useAppli();
   const [etat, setEtat] = useState<EtatCarriere | null>(null);
   const [partieEnCours, setPartieEnCours] = useState(false);
+  const [matchEnCours, setMatchEnCours] = useState(false);
   useEffect(() => {
     lireEtatCarriere().then(setEtat);
     lirePartie().then((p) => setPartieEnCours(!!p));
+    lireMatch().then((m) => setMatchEnCours(!!m));
   }, []);
 
   const ch = etat?.champion;
@@ -51,11 +54,11 @@ export function Accueil() {
             <small>{partieEnCours ? 'Une partie t’attend : reprends-la !' : 'Qualifs, Compet’ et Défi contre le champion'}</small>
           </span>
         </button>
-        <button class="mode-jeu duel" disabled>
+        <button class="mode-jeu duel" onClick={() => aller({ nom: 'duel' })}>
           <span class="mode-emoji">👥</span>
           <span class="mode-texte">
             <strong>Duel à deux</strong>
-            <small>Bientôt disponible</small>
+            <small>{matchEnCours ? 'Un match vous attend : reprenez-le !' : 'À deux sur le même iPhone'}</small>
           </span>
         </button>
         <button class="mode-jeu rapide" onClick={() => aller({ nom: 'rapide-config' })}>

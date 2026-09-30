@@ -1527,35 +1527,6 @@ p {
 }
 
 /* Défi */
-.duel {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 8px;
-}
-
-.duel-bloc {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 16px 8px 12px;
-  border-radius: 18px;
-  background: var(--carte);
-  border: 1px solid var(--bord);
-  text-align: center;
-  font-size: 14px;
-}
-
-.duel-bloc strong {
-  font-size: 17px;
-}
-
-.duel-bloc.fauteuil {
-  border-color: rgba(255, 200, 61, 0.6);
-  background: rgba(255, 200, 61, 0.1);
-}
-
 .duel-vs {
   font-weight: 900;
   font-size: 22px;
@@ -2160,6 +2131,177 @@ p {
 
 .fauteuil-champion .fauteuil {
   margin-top: -6px;
+}
+
+/* --- Duel à deux ----------------------------------------------------------- */
+
+.mode-jeu.duel {
+  border: none;
+  background: linear-gradient(120deg, rgba(45, 226, 230, 0.85), rgba(61, 139, 255, 0.85));
+  color: #06232b;
+  box-shadow: 0 10px 34px rgba(45, 226, 230, 0.3);
+}
+
+.mode-jeu.duel small {
+  color: rgba(6, 35, 43, 0.8);
+}
+
+.duo-joueurs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.carte-joueur-duel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 10px;
+  border-radius: 20px;
+  background: rgba(22, 12, 54, 0.75);
+  border: 1px solid var(--bord);
+}
+
+.carte-joueur-duel input {
+  width: 100%;
+  min-height: 46px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--bord);
+  background: rgba(11, 6, 32, 0.85);
+  color: var(--texte);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.boutons-look {
+  display: flex;
+  gap: 8px;
+}
+
+.grille-formats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.grille-formats .choix-niveau strong {
+  font-size: 16px;
+}
+
+.score-match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.score-match span:first-child {
+  text-align: right;
+}
+
+.score-match span:last-child {
+  text-align: left;
+}
+
+.score-match strong {
+  font-size: 34px;
+  color: var(--or);
+}
+
+.passe-telephone {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  animation: apparition 0.4s ease;
+}
+
+.passe-telephone h2 {
+  font-size: 26px;
+}
+
+.passe-telephone .bouton {
+  max-width: 420px;
+}
+
+/* La pièce du pile ou face */
+.piece-scene {
+  perspective: 700px;
+  display: flex;
+  justify-content: center;
+  padding: 30px 0;
+}
+
+.piece {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  transform-style: preserve-3d;
+}
+
+.piece-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b8, var(--or) 55%, var(--or-fonce));
+  border: 6px solid #e0a52a;
+  box-shadow: 0 10px 30px rgba(255, 200, 61, 0.4), inset 0 0 0 4px rgba(255, 255, 255, 0.25);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  color: #3a2200;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.piece-face.face {
+  transform: rotateY(180deg);
+}
+
+.piece.lance-pile {
+  animation: lancer-pile 2.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+.piece.lance-face {
+  animation: lancer-face 2.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes lancer-pile {
+  0% {
+    transform: translateY(0) rotateY(0);
+  }
+  40% {
+    transform: translateY(-90px) rotateY(900deg);
+  }
+  100% {
+    transform: translateY(0) rotateY(1800deg);
+  }
+}
+
+@keyframes lancer-face {
+  0% {
+    transform: translateY(0) rotateY(0);
+  }
+  40% {
+    transform: translateY(-90px) rotateY(990deg);
+  }
+  100% {
+    transform: translateY(0) rotateY(1980deg);
+  }
 }
 
 /* --- Orientation : le jeu se joue en portrait ---------------------------- */

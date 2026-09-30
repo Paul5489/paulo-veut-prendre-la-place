@@ -57,7 +57,7 @@ function etatJoueurDefile(items: ItemDefile[], correction: boolean, etat: EtatDe
   };
 }
 
-function CarteTheme({ t, classe, onClick, note }: { t: ThemeInfo; classe?: string; onClick?: () => void; note?: string }) {
+export function CarteTheme({ t, classe, onClick, note }: { t: ThemeInfo; classe?: string; onClick?: () => void; note?: string }) {
   const cat = CATEGORIES_PAR_ID[t.categorie];
   return (
     <button class={`theme-carte ${classe ?? ''}`} onClick={onClick} disabled={!onClick}>

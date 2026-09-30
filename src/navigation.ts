@@ -18,7 +18,9 @@ export type Ecran =
   | { nom: 'reglages' }
   | { nom: 'carriere' }
   | { nom: 'carriere-partie' }
-  | { nom: 'palmares' };
+  | { nom: 'palmares' }
+  | { nom: 'duel' }
+  | { nom: 'duel-match' };
 
 export type Aller = (e: Ecran) => void;
 

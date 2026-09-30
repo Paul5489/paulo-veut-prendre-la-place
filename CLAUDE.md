@@ -422,8 +422,9 @@ Script de contrôle `npm run check-questions` :
 - `src/donnees/banque.ts` : chargement de la banque, fichier par fichier.
 - `src/jeu/` : préparation des parties (`partieRapide.ts`, `carriere.ts` : déroulé complet d'une émission, enregistré après chaque étape pour la reprise).
 - `src/composants/` : `CarteQuestion` (une question, du choix du mode à la correction), modale de signalement, etc.
-- `src/ecrans/` : Accueil, Partie rapide (config, jeu, fin), Réglages, `carriere/` (accueil Carrière, partie, manches, Défi, palmarès).
-- `src/composants/` : aussi `Avatar`, `TableauScores` (lignes qui glissent), `Defile` (réponses des adversaires avec Accélérer/Passer), `SaisieNombre`.
+- `src/ecrans/` : Accueil, Partie rapide (config, jeu, fin), Réglages, `carriere/` (accueil Carrière, partie, manches, Défi, palmarès), `duel/` (préparation, match).
+- `src/jeu/duel.ts` et `src/logique/duel.ts` : déroulé et règles du Duel à deux.
+- `src/composants/` : aussi `Avatar` (personnages dessinés en SVG), `Plateau` (pupitres, buzzers, bulles, fauteuil, face-à-face), `TableauScores`, `Defile` (réponses des adversaires avec Accélérer/Passer), `SaisieNombre`, `ModalArbitrage`.
 - `public/data/` : la banque (`categories/*.json`, `themes/*.json`, `departage.json`, `index.json` généré).
 
 ### Écrire des questions
@@ -454,6 +455,12 @@ Script de contrôle `npm run check-questions` :
   - [x] Sauvegarde / restauration des données (avancée depuis la phase 5)
   - [x] Plateau télé (demande de Paul) : avatars dessinés, pupitres avec buzzers, bulles de réponse, projecteur, fauteuil doré, look du joueur modifiable (Réglages)
   - [x] Plateau vérifié à l'écran (et plantage du début du Défi corrigé) ; Paul a validé la Carrière
+- Phase 3 (Duel à deux) :
+  - [x] Préparation (prénoms et looks mémorisés, niveau, 1 / 2 / 3 manches gagnantes), pile ou face animé
+  - [x] Manches façon Défi : le « champion » de la manche choisit les thèmes, écrans « Passe le téléphone », correction différée du challenger, révélation
+  - [x] Contestation tranchée par l'autre joueur, départage numérique en secret en cas d'égalité (nouvelle question si égalité parfaite)
+  - [x] Récapitulatif et historique entre les deux joueurs (victoires, meilleurs scores), revanche
+  - [ ] Paul teste le Duel
 
 ### Choix de règles (phase 2)
 
@@ -463,6 +470,7 @@ Script de contrôle `npm run check-questions` :
 - Les questions montrées pendant le tour des adversaires sont marquées « vues » (reproposées en dernier) sans entrer dans les statistiques de Paul.
 - Modèle des adversaires : compétence = niveau de la partie + force + bonus de catégorie (± progression) ; probabilité de réussite bornée entre 3 % et 97 %.
 - « Thème libre » : non proposé tant que la génération par IA n'existe pas (phase 4, optionnelle).
+- Duel : seules les réponses du joueur 1 (le propriétaire de l'iPhone) comptent dans les statistiques ; celles du joueur 2 marquent juste les questions comme vues. Une égalité en manche se règle au départage (pas d'avantage au « champion »).
 
 ### Adresses
 

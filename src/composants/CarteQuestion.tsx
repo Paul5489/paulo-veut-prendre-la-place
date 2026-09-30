@@ -6,6 +6,7 @@ import { POINTS, pointsObtenus, pointsSuperCash } from '../logique/scores';
 import { NIVEAUX, type ModeReponse, type Question } from '../logique/types';
 import { sons } from '../son';
 import { signalerQuestion } from '../stockage/db';
+import { ModalArbitrage } from './ModalArbitrage';
 import { ModalSignalement } from './ModalSignalement';
 
 export interface ResultatQuestion {
@@ -66,6 +67,8 @@ interface Props {
   potentiel?: number;
   /** prévenu dès la réponse (null = réponse enregistrée sans correction), pour allumer le buzzer */
   onCorrection?: (correct: boolean | null, points: number) => void;
+  /** en duel : prénom de l'autre joueur, qui tranche les contestations */
+  arbitre?: string;
 }
 
 /**
@@ -82,6 +85,7 @@ export function CarteQuestion({
   differee = false,
   potentiel = 0,
   onCorrection,
+  arbitre,
 }: Props) {
   const [mode, setMode] = useState<ModeReponse | null>(modeImpose ?? null);
   const [reponse, setReponse] = useState<string | null>(null);
@@ -91,6 +95,7 @@ export function CarteQuestion({
   const [contestee, setContestee] = useState(false);
   const [tempsEcoule, setTempsEcoule] = useState(false);
   const [signalement, setSignalement] = useState<'ferme' | 'ouvert' | 'fait'>('ferme');
+  const [arbitrage, setArbitrage] = useState<'non' | 'en-cours' | 'refuse'>('non');
   const champ = useRef<HTMLInputElement>(null);
   const propositions = useMemo(() => (mode ? construirePropositions(q, mode) : []), [q, mode]);
 
@@ -256,11 +261,12 @@ export function CarteQuestion({
             </p>
           )}
           <p class="anecdote">💡 {q.anecdote}</p>
-          {mode === 'cash' && !correct && !tempsEcoule && (
-            <button class="bouton secondaire" onClick={contester}>
+          {mode === 'cash' && !correct && !tempsEcoule && arbitrage !== 'refuse' && (
+            <button class="bouton secondaire" onClick={arbitre ? () => setArbitrage('en-cours') : contester}>
               🙋 Contester : j'avais juste
             </button>
           )}
+          {arbitrage === 'refuse' && <p class="doux petit">{arbitre} a refusé la contestation.</p>}
           <button
             class="bouton principal"
             onClick={() =>
@@ -277,6 +283,19 @@ export function CarteQuestion({
             {signalement === 'fait' ? '✓ Question signalée et retirée du jeu' : '⚑ Signaler une erreur'}
           </button>
         </div>
+      )}
+
+      {arbitrage === 'en-cours' && arbitre && (
+        <ModalArbitrage
+          arbitre={arbitre}
+          reponse={reponse ?? ''}
+          bonne={q.reponse}
+          onOui={() => {
+            setArbitrage('non');
+            contester();
+          }}
+          onNon={() => setArbitrage('refuse')}
+        />
       )}
 
       {signalement === 'ouvert' && (
