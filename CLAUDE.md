@@ -453,7 +453,7 @@ Script de contrôle `npm run check-questions` :
   - [x] Palmarès, reprise de partie, statut sur l'accueil
   - [x] Sauvegarde / restauration des données (avancée depuis la phase 5)
   - [x] Plateau télé (demande de Paul) : avatars dessinés, pupitres avec buzzers, bulles de réponse, projecteur, fauteuil doré, look du joueur modifiable (Réglages)
-  - [ ] Vérifier visuellement le plateau sur iPhone (pas encore contrôlé à l'écran après l'ajout) puis Paul teste la Carrière
+  - [x] Plateau vérifié à l'écran (et plantage du début du Défi corrigé) ; Paul a validé la Carrière
 
 ### Choix de règles (phase 2)
 
