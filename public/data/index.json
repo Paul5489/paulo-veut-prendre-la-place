@@ -120,11 +120,32 @@
   },
   "themes": [
     {
+      "id": "arbres-plantes",
+      "titre": "Arbres et plantes",
+      "categorie": "nature",
+      "description": "Des géants de la forêt aux fleurs du jardin, en passant par les plantes carnivores.",
+      "nb": 14
+    },
+    {
       "id": "asterix",
       "titre": "Astérix le Gaulois",
       "categorie": "litterature",
       "description": "Le petit village qui résiste encore et toujours à l'envahisseur, ses habitants et ses auteurs.",
       "nb": 13
+    },
+    {
+      "id": "beatles",
+      "titre": "Les Beatles",
+      "categorie": "arts",
+      "description": "John, Paul, George et Ringo : le groupe qui a changé la musique pop.",
+      "nb": 13
+    },
+    {
+      "id": "capitales-du-monde",
+      "titre": "Capitales du monde",
+      "categorie": "geographie",
+      "description": "Des Amériques à l'Asie en passant par l'Afrique : à chaque pays sa capitale.",
+      "nb": 14
     },
     {
       "id": "capitales-europeennes",
@@ -141,11 +162,53 @@
       "nb": 14
     },
     {
+      "id": "chanson-francaise-classique",
+      "titre": "Les grands de la chanson française",
+      "categorie": "arts",
+      "description": "Piaf, Brel, Brassens, Aznavour et les autres monuments de la chanson.",
+      "nb": 13
+    },
+    {
+      "id": "chateaux-de-france",
+      "titre": "Châteaux et forteresses de France",
+      "categorie": "histoire",
+      "description": "Des châteaux de la Loire aux citadelles médiévales, les grandes demeures de l'histoire de France.",
+      "nb": 13
+    },
+    {
       "id": "coeur-et-sang",
       "titre": "Le cœur et le sang",
       "categorie": "corps",
       "description": "La pompe de notre corps, ses vaisseaux, le sang et les pionniers de la cardiologie.",
       "nb": 13
+    },
+    {
+      "id": "conquete-spatiale",
+      "titre": "La conquête spatiale",
+      "categorie": "sciences",
+      "description": "Satellites, cosmonautes, fusées et robots : l'aventure humaine dans l'espace.",
+      "nb": 13
+    },
+    {
+      "id": "contes-fables",
+      "titre": "Contes et fables",
+      "categorie": "litterature",
+      "description": "Perrault, Grimm, Andersen, La Fontaine : les histoires qui ont bercé notre enfance.",
+      "nb": 13
+    },
+    {
+      "id": "cuisine-italienne",
+      "titre": "La cuisine italienne",
+      "categorie": "gastronomie",
+      "description": "Pâtes, fromages, desserts et spécialités régionales de la Botte.",
+      "nb": 14
+    },
+    {
+      "id": "desserts-patisseries",
+      "titre": "Desserts et pâtisseries",
+      "categorie": "gastronomie",
+      "description": "Choux, tartes, gâteaux régionaux et grands pâtissiers.",
+      "nb": 14
     },
     {
       "id": "dinosaures",
@@ -155,10 +218,52 @@
       "nb": 13
     },
     {
+      "id": "disney-pixar",
+      "titre": "Disney et Pixar",
+      "categorie": "cinema",
+      "description": "Princesses, jouets, poissons et robots : les grands dessins animés des studios.",
+      "nb": 14
+    },
+    {
+      "id": "egypte-ancienne",
+      "titre": "L'Égypte ancienne",
+      "categorie": "histoire",
+      "description": "Pyramides, pharaons, momies et savants qui ont percé les secrets du Nil.",
+      "nb": 13
+    },
+    {
+      "id": "elements-chimiques",
+      "titre": "Les éléments chimiques",
+      "categorie": "sciences",
+      "description": "Symboles, gaz, métaux et découvertes du tableau périodique.",
+      "nb": 13
+    },
+    {
+      "id": "etats-unis",
+      "titre": "Les États-Unis",
+      "categorie": "geographie",
+      "description": "États, villes et grands sites d'Amérique du Nord.",
+      "nb": 13
+    },
+    {
+      "id": "fetes-traditions",
+      "titre": "Fêtes et traditions",
+      "categorie": "mythologie",
+      "description": "Les grandes fêtes et coutumes de France et du monde entier.",
+      "nb": 14
+    },
+    {
       "id": "films-hitchcock",
       "titre": "Les films d'Alfred Hitchcock",
       "categorie": "cinema",
       "description": "Le maître du suspense : ses films, ses acteurs, ses secrets de tournage.",
+      "nb": 13
+    },
+    {
+      "id": "football",
+      "titre": "Le football",
+      "categorie": "sport",
+      "description": "Légendes, clubs, Coupes du monde et grandes soirées de Ligue des champions.",
       "nb": 13
     },
     {
@@ -176,10 +281,52 @@
       "nb": 13
     },
     {
+      "id": "grands-explorateurs",
+      "titre": "Les grands explorateurs",
+      "categorie": "histoire",
+      "description": "Navigateurs, aventuriers et voyageuses qui ont repoussé les limites du monde connu.",
+      "nb": 13
+    },
+    {
+      "id": "grands-musees",
+      "titre": "Les grands musées",
+      "categorie": "arts",
+      "description": "Du Louvre à l'Ermitage, les maisons des chefs-d'œuvre du monde entier.",
+      "nb": 13
+    },
+    {
       "id": "harry-potter",
       "titre": "L'univers de Harry Potter",
       "categorie": "litterature",
       "description": "Les romans du jeune sorcier : personnages, créatures, sortilèges et objets magiques.",
+      "nb": 14
+    },
+    {
+      "id": "iles-du-monde",
+      "titre": "Les îles du monde",
+      "categorie": "geographie",
+      "description": "Des géantes glacées aux petits paradis tropicaux, les îles et archipels célèbres.",
+      "nb": 13
+    },
+    {
+      "id": "informatique-internet",
+      "titre": "L'informatique et Internet",
+      "categorie": "sciences",
+      "description": "Géants du numérique, pionniers de l'informatique et petites histoires du Web.",
+      "nb": 13
+    },
+    {
+      "id": "instruments-musique",
+      "titre": "Les instruments de musique",
+      "categorie": "arts",
+      "description": "Cordes, vents, percussions et curiosités : l'orchestre et bien au-delà.",
+      "nb": 13
+    },
+    {
+      "id": "james-bond",
+      "titre": "James Bond",
+      "categorie": "cinema",
+      "description": "Acteurs, méchants, gadgets et chansons de l'agent secret de Sa Majesté.",
       "nb": 14
     },
     {
@@ -190,11 +337,39 @@
       "nb": 13
     },
     {
+      "id": "jeux-video",
+      "titre": "Les jeux vidéo",
+      "categorie": "insolite",
+      "description": "Consoles, héros pixelisés et jeux cultes, de Pong à Fortnite.",
+      "nb": 14
+    },
+    {
+      "id": "langues-du-monde",
+      "titre": "Les langues du monde",
+      "categorie": "insolite",
+      "description": "Langues vivantes, inventées ou régionales, alphabets et mots voyageurs.",
+      "nb": 14
+    },
+    {
       "id": "louis-de-funes",
       "titre": "Les films de Louis de Funès",
       "categorie": "cinema",
       "description": "Gendarmes, restaurateurs et industriels colériques : la filmographie d'un géant du rire.",
       "nb": 13
+    },
+    {
+      "id": "medecine-sante",
+      "titre": "Médecine et santé",
+      "categorie": "corps",
+      "description": "Grandes découvertes médicales, maladies, vaccins et petits maux du quotidien.",
+      "nb": 13
+    },
+    {
+      "id": "moyen-age",
+      "titre": "Le Moyen Âge",
+      "categorie": "histoire",
+      "description": "Chevaliers, seigneurs, croisades et grandes épidémies, de Charlemagne à la fin du XVe siècle.",
+      "nb": 14
     },
     {
       "id": "mythologie-grecque",
@@ -211,10 +386,38 @@
       "nb": 13
     },
     {
+      "id": "oceans-vie-marine",
+      "titre": "Océans et vie marine",
+      "categorie": "nature",
+      "description": "Récifs, abysses, courants et créatures étonnantes des mers du globe.",
+      "nb": 15
+    },
+    {
+      "id": "oiseaux",
+      "titre": "Les oiseaux",
+      "categorie": "nature",
+      "description": "Rapaces, migrateurs, oiseaux marins et espèces disparues.",
+      "nb": 13
+    },
+    {
+      "id": "paris-monuments",
+      "titre": "Paris et ses monuments",
+      "categorie": "geographie",
+      "description": "Tours, ponts, places et basiliques de la capitale.",
+      "nb": 13
+    },
+    {
       "id": "peintres-impressionnistes",
       "titre": "Les peintres impressionnistes",
       "categorie": "arts",
       "description": "Monet, Degas, Renoir, Morisot… les peintres de la lumière et leurs chefs-d'œuvre.",
+      "nb": 13
+    },
+    {
+      "id": "regions-de-france",
+      "titre": "Régions et départements de France",
+      "categorie": "geographie",
+      "description": "Chefs-lieux, numéros de départements et territoires d'outre-mer.",
       "nb": 13
     },
     {
@@ -232,10 +435,73 @@
       "nb": 13
     },
     {
+      "id": "romans-xixe",
+      "titre": "Les grands romans du XIXe siècle",
+      "categorie": "litterature",
+      "description": "Hugo, Balzac, Flaubert, Zola, Dumas et Verne : le siècle d'or du roman français.",
+      "nb": 13
+    },
+    {
+      "id": "rome-antique",
+      "titre": "La Rome antique",
+      "categorie": "histoire",
+      "description": "Empereurs, légions et monuments de la ville éternelle et de son empire.",
+      "nb": 13
+    },
+    {
+      "id": "rugby",
+      "titre": "Le rugby",
+      "categorie": "sport",
+      "description": "Mêlées, essais, All Blacks et Six Nations : le monde de l'Ovalie.",
+      "nb": 13
+    },
+    {
+      "id": "seconde-guerre-mondiale",
+      "titre": "La Seconde Guerre mondiale",
+      "categorie": "histoire",
+      "description": "De l'invasion de la Pologne à la capitulation allemande : batailles, résistants et grandes décisions.",
+      "nb": 13
+    },
+    {
+      "id": "series-cultes",
+      "titre": "Les séries cultes",
+      "categorie": "cinema",
+      "description": "Des années 1960 à aujourd'hui, les séries qui ont marqué la télévision.",
+      "nb": 14
+    },
+    {
+      "id": "star-wars",
+      "titre": "Star Wars",
+      "categorie": "cinema",
+      "description": "Jedi, Sith, droïdes et vaisseaux d'une galaxie très, très lointaine.",
+      "nb": 14
+    },
+    {
+      "id": "symboles-france",
+      "titre": "Les symboles de la France",
+      "categorie": "societe",
+      "description": "Drapeau, devise, Marianne, coq et autres emblèmes de la République.",
+      "nb": 13
+    },
+    {
       "id": "systeme-solaire",
       "titre": "Le système solaire",
       "categorie": "sciences",
       "description": "Planètes, lunes, sondes et records de notre voisinage cosmique.",
+      "nb": 13
+    },
+    {
+      "id": "tennis",
+      "titre": "Le tennis",
+      "categorie": "sport",
+      "description": "Grand Chelem, légendes de la raquette et règles du jeu.",
+      "nb": 14
+    },
+    {
+      "id": "tintin",
+      "titre": "Les aventures de Tintin",
+      "categorie": "litterature",
+      "description": "Le reporter à la houppe, ses amis et ses aventures autour du monde.",
       "nb": 13
     },
     {
@@ -246,10 +512,24 @@
       "nb": 13
     },
     {
+      "id": "union-europeenne",
+      "titre": "L'Union européenne",
+      "categorie": "societe",
+      "description": "Traités, institutions, pères fondateurs et grandes étapes de la construction européenne.",
+      "nb": 13
+    },
+    {
       "id": "ve-republique",
       "titre": "La Ve République",
       "categorie": "societe",
       "description": "Présidents, institutions et grandes dates de la République depuis 1958.",
+      "nb": 13
+    },
+    {
+      "id": "vins-de-france",
+      "titre": "Les vins de France",
+      "categorie": "gastronomie",
+      "description": "Cépages, terroirs et traditions des vignobles français.",
       "nb": 13
     },
     {

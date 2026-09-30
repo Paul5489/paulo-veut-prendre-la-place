@@ -398,7 +398,8 @@ Script de contrôle `npm run check-questions` :
 ### Décisions prises avec Paul (30/09/2026)
 
 - **Aucune dépense.** Paul ne veut rien payer en plus de son abonnement Claude. La génération par IA dans l'appli (phase 4) passerait par une clé API facturée à part : elle reste **optionnelle et désactivée**. C'est Claude qui agrandit la banque au fil des sessions. Conséquence : pas de « Thème libre » sans clé.
-- **GitHub** : Paul n'a pas encore de compte. Il le créera à l'étape 1.5 (gratuit), avec un guidage pas à pas.
+- **GitHub** : compte gratuit de Paul (Paul5489), voir « Git » plus bas.
+- **Phase 4 abandonnée** (décision de Paul, 30/09/2026) : pas de génération par IA dans l'appli. Quand Paul retombe trop souvent sur les mêmes questions, il demande à Claude d'enrichir la banque.
 - **Règles cash complémentaires** (validées) :
   - les nombres sont toujours exacts, y compris dans un nom (« Louis XV » ≠ « Louis XIV ») ;
   - aucune faute tolérée jusqu'à 3 lettres ;
@@ -432,6 +433,7 @@ Script de contrôle `npm run check-questions` :
 - Une question par ligne. Pour en ajouter, écrire seulement `niveau`, `question`, `reponse`, `variantes`, `mauvaises`, `anecdote`, puis lancer `npm run formater-banque` et `npm run check-questions`.
 - Dans un même thème, aucune question ni anecdote ne doit révéler la réponse d'une autre question du thème.
 - Éviter les réponses cash de plus de 4 mots ; lister les variantes (nom seul, orthographes).
+- Éviter aussi de redemander un fait déjà présent ailleurs dans la banque (catégories ou autres thèmes) : vérifier avant d'ajouter.
 
 ### Git
 
@@ -461,6 +463,12 @@ Script de contrôle `npm run check-questions` :
   - [x] Contestation tranchée par l'autre joueur, départage numérique en secret en cas d'égalité (nouvelle question si égalité parfaite)
   - [x] Récapitulatif et historique entre les deux joueurs (victoires, meilleurs scores), revanche
   - [ ] Paul teste le Duel
+- Retours de Paul (30/09/2026) :
+  - [x] Chrono activé par défaut, durée au choix (15 / 20 / 30 s), réglable aussi au lancement de chaque mode
+  - [x] Réponses des adversaires plus rapides (cascade sur les questions collectives, bouton Accélérer)
+  - [x] Révélation finale automatique : roulement de tambour, carte qui se retourne, défilement automatique, confettis
+  - [x] Banque agrandie : 60 thèmes (+40), 1 161 questions au total
+- Phase 4 : abandonnée (voir Décisions).
 
 ### Choix de règles (phase 2)
 
@@ -469,7 +477,7 @@ Script de contrôle `npm run check-questions` :
 - Quand Paul est champion, Qualifs et Compet' sont simulées sans questions réelles (scores seulement) ; en cas d'égalité en tête de Compet', c'est Paul qui choisit son challenger.
 - Les questions montrées pendant le tour des adversaires sont marquées « vues » (reproposées en dernier) sans entrer dans les statistiques de Paul.
 - Modèle des adversaires : compétence = niveau de la partie + force + bonus de catégorie (± progression) ; probabilité de réussite bornée entre 3 % et 97 %.
-- « Thème libre » : non proposé tant que la génération par IA n'existe pas (phase 4, optionnelle).
+- « Thème libre » : non proposé (il dépendait de la génération par IA de la phase 4, abandonnée).
 - Duel : seules les réponses du joueur 1 (le propriétaire de l'iPhone) comptent dans les statistiques ; celles du joueur 2 marquent juste les questions comme vues. Une égalité en manche se règle au départage (pas d'avantage au « champion »).
 
 ### Adresses
