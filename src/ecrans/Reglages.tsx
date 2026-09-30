@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Interrupteur } from '../composants/Interrupteur';
+import { ReglageChrono } from '../composants/ReglageChrono';
 import { CATEGORIES_PAR_ID } from '../logique/categories';
 import { MOTIFS_SIGNALEMENT } from '../logique/types';
 import { useAppli } from '../navigation';
@@ -132,12 +133,7 @@ export function EcranReglages() {
           />
         </label>
         <Interrupteur libelle="🔊 Son" actif={reglages.son} onChange={(son) => changerReglages({ son })} />
-        <Interrupteur
-          libelle="⏱️ Chrono de 20 secondes"
-          detail="Pour chaque question, dans tous les modes"
-          actif={reglages.chrono}
-          onChange={(chrono) => changerReglages({ chrono })}
-        />
+        <ReglageChrono />
       </section>
 
       <section class="bloc">

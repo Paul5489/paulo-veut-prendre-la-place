@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { ReglageChrono } from '../composants/ReglageChrono';
 import { CATEGORIES, estCategorie } from '../logique/categories';
 import { NIVEAUX, type CategorieId, type Niveau } from '../logique/types';
 import { useAppli } from '../navigation';
@@ -79,6 +80,10 @@ export function RapideConfig() {
             </button>
           ))}
         </div>
+      </section>
+
+      <section class="bloc">
+        <ReglageChrono />
       </section>
 
       <div class="bas-fixe">

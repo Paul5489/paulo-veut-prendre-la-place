@@ -1758,6 +1758,27 @@ p {
   text-align: center;
 }
 
+/* Réglage du chrono */
+.durees-chrono {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.choix-duree {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 2px solid var(--bord);
+  background: var(--carte);
+  font-weight: 800;
+}
+
+.choix-duree.actif {
+  border-color: var(--or);
+  background: rgba(255, 200, 61, 0.16);
+}
+
 /* Réglages : avatar, prénom et fichier de sauvegarde */
 .ligne-avatar {
   display: flex;
@@ -2301,6 +2322,130 @@ p {
   }
   100% {
     transform: translateY(0) rotateY(1980deg);
+  }
+}
+
+/* --- Révélation animée et confettis ----------------------------------------- */
+
+.liste-revelation li {
+  padding: 10px 12px;
+}
+
+.revelation-question {
+  font-size: 14px;
+  color: var(--texte-doux);
+}
+
+.revelation-saisie {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.liste-revelation li.revele {
+  animation: revele 0.5s ease;
+}
+
+.liste-revelation li.juste.revele {
+  box-shadow: 0 0 22px rgba(46, 229, 157, 0.45);
+}
+
+.liste-revelation li.suspense {
+  border-color: var(--or);
+  background: rgba(255, 200, 61, 0.12);
+  animation: tremble 0.25s linear infinite;
+}
+
+.resultat.retourne {
+  animation: retourne 0.45s ease;
+}
+
+@keyframes retourne {
+  0% {
+    transform: rotateX(90deg) scale(1.4);
+  }
+  60% {
+    transform: rotateX(-15deg) scale(1.15);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes revele {
+  0% {
+    transform: scale(0.97);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes tremble {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.commandes-revelation {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verdict-defi {
+  font-size: 23px;
+  animation: verdict 0.7s cubic-bezier(0.2, 1.4, 0.4, 1);
+  box-shadow: 0 10px 40px rgba(255, 61, 139, 0.35);
+}
+
+@keyframes verdict {
+  0% {
+    transform: scale(0.3) rotate(-6deg);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.confettis {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confettis span {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  animation-name: chute;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes chute {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0.8;
   }
 }
 

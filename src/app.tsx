@@ -11,6 +11,7 @@ import { RapideFin } from './ecrans/RapideFin';
 import { RapideJeu } from './ecrans/RapideJeu';
 import { EcranReglages } from './ecrans/Reglages';
 import { Contexte, type Ecran } from './navigation';
+import { reglerChrono } from './chrono';
 import { activerSon } from './son';
 import { demanderStockagePersistant, ecrireReglages, lireReglages, type Reglages } from './stockage/db';
 
@@ -23,6 +24,7 @@ export function App() {
   useEffect(() => {
     lireReglages().then((r) => {
       activerSon(r.son);
+      reglerChrono(r.dureeChrono);
       setReglages(r);
     });
     demanderStockagePersistant();
@@ -34,6 +36,7 @@ export function App() {
     const r = { ...reglages, ...modif };
     setReglages(r);
     activerSon(r.son);
+    reglerChrono(r.dureeChrono);
     ecrireReglages(r);
   };
 

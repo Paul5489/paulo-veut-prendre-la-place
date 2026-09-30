@@ -82,15 +82,24 @@ export function Defile({ titre, questionCommune, items, correction, libelleFin, 
   const [rapide, setRapide] = useState(false);
   const fini = index >= items.length;
 
+  // Question commune : tout le monde réfléchit en même temps, puis les buzzers s'allument en cascade.
+  const cascade = !!questionCommune;
+
   useEffect(() => {
     if (fini) return;
-    const vitesse = rapide ? 4 : 1;
-    const duree = phase === 'reflexion' ? (items[index].delai * 1000) / vitesse : 1500 / vitesse;
+    const vitesse = rapide ? 3 : 1;
+    const reflexion = cascade ? (index === 0 ? 1300 : 0) : Math.min(1800, 500 + items[index].delai * 300);
+    const affichage = cascade ? 550 : 1000;
+    const duree = (phase === 'reflexion' ? reflexion : affichage) / vitesse;
     const t = setTimeout(() => {
       if (phase === 'reflexion') {
         setPhase('reponse');
-        sons.buzz();
-        if (correction) setTimeout(items[index].correct ? sons.bonne : sons.mauvaise, 220);
+        if (!correction) sons.buzz();
+        else if (cascade) sons.bip(items[index].correct);
+        else {
+          sons.buzz();
+          setTimeout(items[index].correct ? sons.bonne : sons.mauvaise, 200);
+        }
       } else {
         setPhase('reflexion');
         setIndex(index + 1);
@@ -143,7 +152,7 @@ export function Defile({ titre, questionCommune, items, correction, libelleFin, 
         </ul>
       )}
 
-      {actuel && (
+      {actuel && !(cascade && scene) && (
         <div class="defile-carte" key={index}>
           <div class="defile-entete">
             <Avatar p={actuel.participant} taille={46} />

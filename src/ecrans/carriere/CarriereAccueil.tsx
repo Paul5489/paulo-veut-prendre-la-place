@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { presentation } from '../../composants/Avatar';
 import { Fauteuil } from '../../composants/Plateau';
 import { Interrupteur } from '../../composants/Interrupteur';
+import { ReglageChrono } from '../../composants/ReglageChrono';
 import {
   ecrireEtatCarriere,
   lireEtatCarriere,
@@ -137,6 +138,7 @@ export function CarriereAccueil() {
       )}
 
       <section class="bloc">
+        <ReglageChrono />
         <Interrupteur
           libelle="📈 Challengers de plus en plus forts"
           detail="Quand tu es champion, chaque victoire rend les suivants un peu plus redoutables."

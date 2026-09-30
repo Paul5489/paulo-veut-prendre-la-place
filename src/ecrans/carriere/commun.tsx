@@ -13,7 +13,7 @@ import { enregistrerReponse } from '../../stockage/db';
 export interface PropsEtape {
   p: PartieCarriere;
   /** enregistre la nouvelle étape de la partie (et l'affiche) */
-  maj: (suite: PartieCarriere | Promise<PartieCarriere>) => void;
+  maj: (suite: PartieCarriere | Promise<PartieCarriere>, options?: { defiler?: boolean }) => void;
   occupe: boolean;
   chrono: boolean;
 }

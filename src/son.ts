@@ -48,10 +48,16 @@ export const sons = {
     note(165, 0.18, 0.4, 'sawtooth', 0.09);
   },
   tictac: () => note(1200, 0, 0.05, 'square', 0.04),
+  /** petit signal pour les réponses en cascade : aigu si juste, grave si faux */
+  bip: (juste: boolean) => note(juste ? 880 : 220, 0, 0.12, juste ? 'triangle' : 'square', juste ? 0.1 : 0.06),
   /** coup de buzzer */
   buzz: () => {
     note(140, 0, 0.18, 'square', 0.1);
     note(147, 0, 0.18, 'sawtooth', 0.06);
+  },
+  /** roulement de tambour (environ une seconde) */
+  roulement: () => {
+    for (let i = 0; i < 14; i++) note(95 + (i % 2) * 12, i * 0.065, 0.06, 'square', 0.025 + i * 0.004);
   },
   /** montée de tension avant une révélation */
   suspense: () => {

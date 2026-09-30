@@ -3,6 +3,7 @@ import type { ResultatQuestion } from '../composants/CarteQuestion';
 import { NOM_MODE, scoreMaximal, total } from '../logique/scores';
 import { NIVEAUX, type CategorieId, type Niveau } from '../logique/types';
 import { useAppli } from '../navigation';
+import { Confettis } from '../composants/Revelation';
 import { sons } from '../son';
 
 interface Props {
@@ -38,6 +39,7 @@ export function RapideFin({ niveau, categorie, resultats, record }: Props) {
         <span class="valeur">{score}</span>
         <span class="sur">/ {max} points</span>
       </div>
+      {record && <Confettis />}
       {record && <div class="nouveau-record">🏆 Nouveau record en niveau {NIVEAUX[niveau - 1].nom} !</div>}
       <p class="doux centre-texte">
         {bonnes} bonne{bonnes > 1 ? 's' : ''} réponse{bonnes > 1 ? 's' : ''} sur {resultats.length}. {commentaire(score, max)}

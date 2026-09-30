@@ -37,9 +37,20 @@ export interface Reglages {
   prenom: string;
   /** variation du dessin de l'avatar du joueur */
   avatarGraine: number;
+  /** durée du chrono, en secondes */
+  dureeChrono: number;
+  /** version des réglages (pour les changements de valeurs par défaut) */
+  versionReglages: number;
 }
 
-export const REGLAGES_DEFAUT: Reglages = { son: true, chrono: false, prenom: 'Paulo', avatarGraine: 0 };
+export const REGLAGES_DEFAUT: Reglages = {
+  son: true,
+  chrono: true,
+  prenom: 'Paulo',
+  avatarGraine: 0,
+  dureeChrono: 20,
+  versionReglages: 2,
+};
 
 /** Meilleur score de la partie rapide, par niveau */
 export type Records = Partial<Record<Niveau, number>>;
@@ -165,6 +176,12 @@ export async function supprimerValeur(cle: string): Promise<void> {
 
 export async function lireReglages(): Promise<Reglages> {
   const r = (await (await db()).get('kv', 'reglages')) as Partial<Reglages> | undefined;
+  if (r && (r.versionReglages ?? 1) < 2) {
+    // Paul a demandé un temps limité pour répondre : le chrono passe activé par défaut (une seule fois).
+    const maj = { ...REGLAGES_DEFAUT, ...r, chrono: true, versionReglages: 2 };
+    await ecrireReglages(maj);
+    return maj;
+  }
   return { ...REGLAGES_DEFAUT, ...r };
 }
 

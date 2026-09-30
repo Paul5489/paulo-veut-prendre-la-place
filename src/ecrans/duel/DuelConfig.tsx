@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Avatar } from '../../composants/Avatar';
+import { ReglageChrono } from '../../composants/ReglageChrono';
 import {
   ecrireJoueursDuel,
   lireHistoriqueDuo,
@@ -154,6 +155,10 @@ export function DuelConfig() {
                 </button>
               ))}
             </div>
+          </section>
+
+          <section class="bloc">
+            <ReglageChrono />
           </section>
 
           <p class="doux petit centre-texte">

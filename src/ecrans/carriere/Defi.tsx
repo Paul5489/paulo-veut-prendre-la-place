@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { CarteQuestion } from '../../composants/CarteQuestion';
 import { Defile, type EtatDefile, type ItemDefile } from '../../composants/Defile';
 import { SceneDuel, type EtatBuzzer, type EtatPupitre } from '../../composants/Plateau';
+import { Confettis, Revelation } from '../../composants/Revelation';
 import {
   attribuerThemes,
   NB_QUESTIONS_DEFI,
@@ -13,7 +14,7 @@ import {
 } from '../../jeu/carriere';
 import type { ThemeInfo } from '../../logique/carriere';
 import { CATEGORIES_PAR_ID } from '../../logique/categories';
-import { NOM_MODE, pointsObtenus } from '../../logique/scores';
+import { pointsObtenus } from '../../logique/scores';
 import type { CategorieId } from '../../logique/types';
 import { sons } from '../../son';
 import { marquerVues, tauxParCategorie } from '../../stockage/db';
@@ -299,7 +300,7 @@ export function EtapeDefiJeu({ p, maj, chrono }: PropsEtape) {
 }
 
 // ---------------------------------------------------------------------------
-// Révélation des réponses du challenger, une par une
+// Révélation des réponses du challenger, dévoilées automatiquement
 // ---------------------------------------------------------------------------
 
 export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
@@ -312,16 +313,11 @@ export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
   const scoreChampion = scoreDefi(d.questionsChampion);
   const fini = revelees >= liste.length;
   const challengerGagne = fini && scoreChallenger > scoreChampion;
+  const joueurGagne = challengerGagne === challenger.estJoueur;
 
-  const reveler = () => {
-    setSuspense(true);
-    sons.suspense();
-    setTimeout(() => {
-      setSuspense(false);
-      (liste[revelees].reponse?.correct ? sons.bonne : sons.mauvaise)();
-      maj({ ...p, pas: revelees + 1 });
-    }, 1600);
-  };
+  useEffect(() => {
+    if (fini) (joueurGagne ? sons.victoire : sons.defaite)();
+  }, [fini]);
 
   const contester = (i: number) => {
     const s = cloner(p);
@@ -330,7 +326,7 @@ export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
     r.contestee = true;
     r.points = pointsObtenus(r.mode, true);
     sons.bonne();
-    maj(s);
+    maj(s, { defiler: false });
   };
 
   const conclure = () => {
@@ -338,9 +334,13 @@ export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
     maj(terminerDefi(p));
   };
 
+  const derniere = revelees > 0 ? liste[revelees - 1].reponse : undefined;
   return (
     <>
-      <BandeauEtape titre="🥁 La révélation" detail={challenger.estJoueur ? 'Tes réponses, dévoilées une par une.' : `Les réponses ${de(challenger.prenom)}, dévoilées une par une.`} />
+      <BandeauEtape
+        titre="🥁 La révélation"
+        detail={challenger.estJoueur ? 'Tes réponses, dévoilées une par une.' : `Les réponses ${de(challenger.prenom)}, dévoilées une par une.`}
+      />
       <Duel
         p={p}
         gauche={`${scoreChallenger} pts`}
@@ -348,54 +348,17 @@ export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
         challenger={
           suspense
             ? { eclaire: true, bulle: '…' }
-            : revelees > 0
-              ? {
-                  buzzer: liste[revelees - 1].reponse?.correct ? 'juste' : 'faux',
-                  bulle: `« ${liste[revelees - 1].reponse?.saisie ?? '—'} »`,
-                }
-              : {}
+            : derniere && !fini
+              ? { buzzer: derniere.correct ? 'juste' : 'faux', bulle: `« ${derniere.saisie ?? '—'} »`, eclaire: true }
+              : fini
+                ? { buzzer: challengerGagne ? 'juste' : 'faux', eclaire: challengerGagne }
+                : {}
         }
-        champion={fini ? { buzzer: challengerGagne ? 'faux' : 'juste' } : {}}
+        champion={fini ? { buzzer: challengerGagne ? 'faux' : 'juste', eclaire: !challengerGagne } : {}}
       />
-      <ul class="liste-revelation">
-        {liste.map((x, i) => {
-          const r = x.reponse!;
-          const montre = i < revelees;
-          return (
-            <li key={x.question.id} class={montre ? (r.correct ? 'juste' : 'faux') : i === revelees && suspense ? 'suspense' : ''}>
-              <p class="revelation-question">{x.question.question}</p>
-              <p class="revelation-reponse">
-                <span class={`chip mode-choisi ${r.mode ?? ''}`}>{r.mode ? NOM_MODE[r.mode] : '—'}</span>
-                <span>« {r.saisie ?? 'pas de réponse'} »</span>
-                <span class={`resultat ${montre ? (r.correct ? 'juste' : 'faux') : 'masque'}`}>
-                  {montre ? (r.correct ? `✓ +${r.points}` : '✗') : '?'}
-                </span>
-              </p>
-              {montre && !r.correct && (
-                <p class="doux petit">
-                  Bonne réponse : <strong class="or">{x.question.reponse}</strong>
-                </p>
-              )}
-              {montre && challenger.estJoueur && r.mode === 'cash' && !r.correct && r.saisie && (
-                <button class="bouton petit secondaire" onClick={() => contester(i)}>
-                  🙋 Contester : j'avais juste
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      {!fini ? (
+      {fini && (
         <>
-          <button class="bouton principal grand" disabled={suspense} onClick={reveler}>
-            {suspense ? 'Suspense…' : `Révéler la réponse n°${revelees + 1}`}
-          </button>
-          <button class="bouton fantome" disabled={suspense} onClick={() => maj({ ...p, pas: liste.length })}>
-            Tout révéler d'un coup
-          </button>
-        </>
-      ) : (
-        <>
+          {joueurGagne && <Confettis />}
           <p class={`verdict-defi ${challengerGagne ? 'challenger' : 'champion'}`}>
             {challengerGagne
               ? `${challenger.estJoueur ? 'Tu l’emportes' : `${challenger.prenom} l’emporte`} ${scoreChallenger} à ${scoreChampion} !`
@@ -408,6 +371,17 @@ export function EtapeRevelation({ p, maj, occupe }: PropsEtape) {
           </button>
         </>
       )}
+      <Revelation
+        liste={liste}
+        revelees={revelees}
+        onReveler={(n) => maj({ ...p, pas: n }, { defiler: false })}
+        onSuspense={setSuspense}
+        contestable={(i) => {
+          const r = liste[i].reponse!;
+          return challenger.estJoueur && r.mode === 'cash' && !r.correct && !!r.saisie;
+        }}
+        onContester={contester}
+      />
     </>
   );
 }

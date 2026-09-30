@@ -6,6 +6,7 @@ import { POINTS, pointsObtenus, pointsSuperCash } from '../logique/scores';
 import { NIVEAUX, type ModeReponse, type Question } from '../logique/types';
 import { sons } from '../son';
 import { signalerQuestion } from '../stockage/db';
+import { dureeChrono } from '../chrono';
 import { ModalArbitrage } from './ModalArbitrage';
 import { ModalSignalement } from './ModalSignalement';
 
@@ -19,19 +20,19 @@ export interface ResultatQuestion {
   tempsEcoule: boolean;
 }
 
-export const DUREE_CHRONO = 20;
 
 /** Compte à rebours ; appelle `auBout` une seule fois quand il atteint zéro. */
-function useChrono(actif: boolean, auBout: () => void): number {
-  const [restant, setRestant] = useState(DUREE_CHRONO);
+function useChrono(actif: boolean, auBout: () => void): [number, number] {
+  const [duree] = useState(dureeChrono);
+  const [restant, setRestant] = useState(duree);
   const debut = useRef(Date.now());
   const rappel = useRef(auBout);
   rappel.current = auBout;
   useEffect(() => {
     if (!actif) return;
-    let derniereSeconde = DUREE_CHRONO;
+    let derniereSeconde = duree;
     const id = setInterval(() => {
-      const r = Math.max(0, DUREE_CHRONO - (Date.now() - debut.current) / 1000);
+      const r = Math.max(0, duree - (Date.now() - debut.current) / 1000);
       setRestant(r);
       const s = Math.ceil(r);
       if (s < derniereSeconde && s <= 5 && s > 0) sons.tictac();
@@ -43,7 +44,7 @@ function useChrono(actif: boolean, auBout: () => void): number {
     }, 100);
     return () => clearInterval(id);
   }, [actif]);
-  return restant;
+  return [restant, duree];
 }
 
 const DESCRIPTION_MODE: Record<ModeReponse, string> = {
@@ -108,7 +109,7 @@ export function CarteQuestion({
     else sons.mauvaise();
   };
 
-  const restant = useChrono(chrono && !corrigee, () => {
+  const [restant, dureeTotale] = useChrono(chrono && !corrigee, () => {
     setTempsEcoule(true);
     corriger(false);
   });
@@ -168,7 +169,7 @@ export function CarteQuestion({
 
       {chrono && (
         <div class={`chrono ${restant <= 5 ? 'urgent' : ''}`} aria-label={`${Math.ceil(restant)} secondes`}>
-          <div class="chrono-barre" style={{ width: `${(restant / DUREE_CHRONO) * 100}%` }} />
+          <div class="chrono-barre" style={{ width: `${(restant / dureeTotale) * 100}%` }} />
           <span>{Math.ceil(restant)} s</span>
         </div>
       )}

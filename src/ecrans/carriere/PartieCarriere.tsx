@@ -2,6 +2,7 @@ import type { JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { Avatar, presentation } from '../../composants/Avatar';
 import { Fauteuil, Plateau } from '../../composants/Plateau';
+import { Confettis } from '../../composants/Revelation';
 import {
   lireEtatCarriere,
   lirePartie,
@@ -64,13 +65,13 @@ export function EcranPartieCarriere() {
     );
   }
 
-  const maj = async (suite: PartieCarriere | Promise<PartieCarriere>) => {
+  const maj = async (suite: PartieCarriere | Promise<PartieCarriere>, options?: { defiler?: boolean }) => {
     setOccupe(true);
     try {
       const s = await suite;
       await sauverPartie(s);
       setP(s);
-      window.scrollTo(0, 0);
+      if (options?.defiler !== false) window.scrollTo(0, 0);
     } catch (e) {
       alert(`Oups, un problème est survenu : ${(e as Error).message}`);
     } finally {
@@ -215,6 +216,7 @@ function EtapeFin({ p }: PropsEtape) {
 
   return (
     <div class="fin-carriere">
+      {joueurGagne && <Confettis />}
       <h1 class="titre-fin">{titre}</h1>
       <p class="centre-texte">{texte}</p>
       {i.pendantCeTemps && <p class="encart">📺 Pendant ce temps : {i.pendantCeTemps}</p>}

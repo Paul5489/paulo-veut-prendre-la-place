@@ -4,6 +4,7 @@ import { Avatar } from '../../composants/Avatar';
 import { CarteQuestion } from '../../composants/CarteQuestion';
 import { ModalArbitrage } from '../../composants/ModalArbitrage';
 import { SceneDuel, type EtatBuzzer, type EtatPupitre } from '../../composants/Plateau';
+import { Confettis, Revelation } from '../../composants/Revelation';
 import { SaisieNombre } from '../../composants/SaisieNombre';
 import { NB_QUESTIONS_DEFI, scoreDefi, scorePotentiel, type QuestionPerso } from '../../jeu/carriere';
 import {
@@ -28,7 +29,7 @@ import {
 } from '../../jeu/duel';
 import type { ThemeInfo } from '../../logique/carriere';
 import { autre, scoreMatch, type HistoriqueDuo, type IdJoueurDuel } from '../../logique/duel';
-import { NOM_MODE, pointsObtenus } from '../../logique/scores';
+import { pointsObtenus } from '../../logique/scores';
 import type { Question } from '../../logique/types';
 import { useAppli } from '../../navigation';
 import { sons } from '../../son';
@@ -39,7 +40,7 @@ import type { ReponseEnregistree } from '../../logique/carriere';
 
 interface PropsEtape {
   m: MatchDuel;
-  maj: (suite: MatchDuel | Promise<MatchDuel>) => void;
+  maj: (suite: MatchDuel | Promise<MatchDuel>, options?: { defiler?: boolean }) => void;
   occupe: boolean;
   chrono: boolean;
 }
@@ -96,13 +97,13 @@ export function EcranMatchDuel() {
 
   if (!m) return null;
 
-  const maj = async (suite: MatchDuel | Promise<MatchDuel>) => {
+  const maj = async (suite: MatchDuel | Promise<MatchDuel>, options?: { defiler?: boolean }) => {
     setOccupe(true);
     try {
       const s = await suite;
       await sauverMatch(s);
       setM(s);
-      window.scrollTo(0, 0);
+      if (options?.defiler !== false) window.scrollTo(0, 0);
     } catch (err) {
       alert(`Oups, un problème est survenu : ${(err as Error).message}`);
     } finally {
@@ -359,16 +360,11 @@ function EtapeRevelation({ m, maj, occupe }: PropsEtape) {
   const scoreChallenger = scoreDefi(liste.slice(0, revelees));
   const scoreChampion = scoreDefi(manche.questionsChampion);
   const fini = revelees >= liste.length;
+  const egalite = fini && scoreChallenger === scoreChampion;
 
-  const reveler = () => {
-    setSuspense(true);
-    sons.suspense();
-    setTimeout(() => {
-      setSuspense(false);
-      (liste[revelees].reponse?.correct ? sons.bonne : sons.mauvaise)();
-      maj({ ...m, pas: revelees + 1 });
-    }, 1600);
-  };
+  useEffect(() => {
+    if (fini) (egalite ? sons.suspense : sons.victoire)();
+  }, [fini]);
 
   const valider = (i: number) => {
     const s = cloner(m);
@@ -378,7 +374,7 @@ function EtapeRevelation({ m, maj, occupe }: PropsEtape) {
     r.points = pointsObtenus(r.mode, true);
     setContestation(null);
     sons.bonne();
-    maj(s);
+    maj(s, { defiler: false });
   };
 
   const conclure = () => {
@@ -387,6 +383,7 @@ function EtapeRevelation({ m, maj, occupe }: PropsEtape) {
   };
 
   const derniere = revelees > 0 ? liste[revelees - 1].reponse : undefined;
+  const challengerDevant = scoreChallenger > scoreChampion;
   return (
     <>
       <BandeauEtape titre="🥁 La révélation" detail={`Les réponses ${de(challenger.prenom)}, dévoilées une par une.`} />
@@ -397,40 +394,39 @@ function EtapeRevelation({ m, maj, occupe }: PropsEtape) {
         etatChallenger={
           suspense
             ? { eclaire: true, bulle: '…' }
-            : derniere
-              ? { buzzer: derniere.correct ? 'juste' : 'faux', bulle: `« ${derniere.saisie ?? '—'} »` }
-              : {}
+            : derniere && !fini
+              ? { buzzer: derniere.correct ? 'juste' : 'faux', bulle: `« ${derniere.saisie ?? '—'} »`, eclaire: true }
+              : fini && !egalite
+                ? { buzzer: challengerDevant ? 'juste' : 'faux', eclaire: challengerDevant }
+                : {}
         }
+        etatChampion={fini && !egalite ? { buzzer: challengerDevant ? 'faux' : 'juste', eclaire: !challengerDevant } : {}}
       />
-      <ul class="liste-revelation">
-        {liste.map((x, i) => {
-          const r = x.reponse!;
-          const montre = i < revelees;
-          return (
-            <li key={x.question.id} class={montre ? (r.correct ? 'juste' : 'faux') : i === revelees && suspense ? 'suspense' : ''}>
-              <p class="revelation-question">{x.question.question}</p>
-              <p class="revelation-reponse">
-                <span class={`chip mode-choisi ${r.mode ?? ''}`}>{r.mode ? NOM_MODE[r.mode] : '—'}</span>
-                <span>« {r.saisie ?? 'pas de réponse'} »</span>
-                <span class={`resultat ${montre ? (r.correct ? 'juste' : 'faux') : 'masque'}`}>
-                  {montre ? (r.correct ? `✓ +${r.points}` : '✗') : '?'}
-                </span>
-              </p>
-              {montre && !r.correct && (
-                <p class="doux petit">
-                  Bonne réponse : <strong class="or">{x.question.reponse}</strong>
-                </p>
-              )}
-              {montre && r.mode === 'cash' && !r.correct && r.saisie && !refusees.includes(i) && (
-                <button class="bouton petit secondaire" onClick={() => setContestation(i)}>
-                  🙋 Contester
-                </button>
-              )}
-              {refusees.includes(i) && <p class="doux petit">{champion.prenom} a refusé la contestation.</p>}
-            </li>
-          );
-        })}
-      </ul>
+      {fini && (
+        <>
+          {!egalite && <Confettis />}
+          <p class={`verdict-defi ${egalite ? 'champion' : 'challenger'}`}>
+            {egalite
+              ? `Égalité ${scoreChallenger} partout !`
+              : `${(challengerDevant ? challenger : champion).prenom} gagne la manche, ${Math.max(scoreChallenger, scoreChampion)} à ${Math.min(scoreChallenger, scoreChampion)} !`}
+          </p>
+          <button class="bouton principal grand" disabled={occupe} onClick={conclure}>
+            {egalite ? 'Question de départage →' : 'Bilan de la manche →'}
+          </button>
+        </>
+      )}
+      <Revelation
+        liste={liste}
+        revelees={revelees}
+        onReveler={(n) => maj({ ...m, pas: n }, { defiler: false })}
+        onSuspense={setSuspense}
+        contestable={(i) => {
+          const r = liste[i].reponse!;
+          return r.mode === 'cash' && !r.correct && !!r.saisie && !refusees.includes(i);
+        }}
+        onContester={setContestation}
+        notes={Object.fromEntries(refusees.map((i) => [i, `${champion.prenom} a refusé la contestation.`]))}
+      />
       {contestation !== null && (
         <ModalArbitrage
           arbitre={champion.prenom}
@@ -442,26 +438,6 @@ function EtapeRevelation({ m, maj, occupe }: PropsEtape) {
             setContestation(null);
           }}
         />
-      )}
-      {!fini ? (
-        <>
-          <button class="bouton principal grand" disabled={suspense} onClick={reveler}>
-            {suspense ? 'Suspense…' : `Révéler la réponse n°${revelees + 1}`}
-          </button>
-          <button class="bouton fantome" disabled={suspense} onClick={() => maj({ ...m, pas: liste.length })}>
-            Tout révéler d'un coup
-          </button>
-        </>
-      ) : (
-        <>
-          <p class="verdict-defi challenger">
-            {challenger.prenom} {scoreChallenger} – {scoreChampion} {champion.prenom}
-            {scoreChallenger === scoreChampion ? ' : égalité !' : ''}
-          </p>
-          <button class="bouton principal grand" disabled={occupe} onClick={conclure}>
-            {scoreChallenger === scoreChampion ? 'Question de départage →' : 'Résultat de la manche →'}
-          </button>
-        </>
       )}
     </>
   );
@@ -632,6 +608,7 @@ function EtapeFin({ m }: PropsEtape) {
 
   return (
     <div class="fin-carriere">
+      <Confettis nombre={60} />
       <div class="fauteuil-champion">
         <p class="petit-titre">Vainqueur du match</p>
         <Avatar p={vainqueur} taille={96} couronne />
