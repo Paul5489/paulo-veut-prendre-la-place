@@ -1,0 +1,28 @@
+{
+  "name": "paulo-veut-prendre-la-place",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Jeu de culture générale pour iPhone : Qualifs, Compet' et Défi contre le champion.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "npm run formater-banque && npm run check-questions && tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "formater-banque": "tsx scripts/formater-banque.ts",
+    "check-questions": "tsx scripts/check-questions.ts"
+  },
+  "dependencies": {
+    "idb": "^8.0.3",
+    "preact": "^11.0.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "*",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^5.0.2"
+  }
+}
