@@ -1174,10 +1174,10 @@ p {
 
 .couronne {
   position: absolute;
-  top: -42%;
+  top: -30%;
   left: 50%;
   transform: translateX(-50%) rotate(-8deg);
-  font-size: 70%;
+  line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 

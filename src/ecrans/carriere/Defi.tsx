@@ -219,7 +219,8 @@ export function EtapeDefiJeu({ p, maj, chrono }: PropsEtape) {
     />
   );
 
-  const items = liste.map((x) => itemDefile(enChallenger ? challenger : p.champion, x.reponse!, x.question));
+  // (quand c'est au joueur de jouer, ses réponses n'existent pas encore : pas de défilé)
+  const items = joueur ? [] : liste.map((x) => itemDefile(enChallenger ? challenger : p.champion, x.reponse!, x.question));
 
   if (!joueur) {
     return (

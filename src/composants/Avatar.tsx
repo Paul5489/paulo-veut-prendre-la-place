@@ -229,7 +229,11 @@ export function Avatar({ p, taille = 40, couronne = false }: Props) {
           )}
         </g>
       </svg>
-      {couronne && <span class="couronne">👑</span>}
+      {couronne && (
+        <span class="couronne" style={{ fontSize: `${Math.round(taille * 0.42)}px` }}>
+          👑
+        </span>
+      )}
     </span>
   );
 }
